@@ -57,24 +57,45 @@ batched set of questions, not one at a time):
 Anything left unanswered is left out of the scaffold rather than defaulted
 — report it as "not set up" rather than guessing.
 
+## Check the conventions log first
+
+Before asking the "everything else" list, read `docs/conventions.md` in
+this harness repo (`rn-mobile-harness`, wherever it's checked out — same
+place this skill file lives). It's a running log of naming/structure
+decisions already made across the user's projects. For anything it already
+covers, apply it directly instead of asking again — only ask about what
+the log doesn't yet address. If the log resolves something that would
+otherwise be part of the "everything else" batch, say so explicitly
+("using X per the conventions log") rather than silently complying, so the
+user can see it's not being newly decided here.
+
+This skill only reads the log, it doesn't write to it — new cross-project
+decisions get recorded by `cross-project-consistency` (or directly in
+conversation) once the user actually makes a call, not invented here.
+
 ## Process
 
 1. State the two fixed pieces up front (strict TS is on; ask the folder
    style question) before anything else.
-2. Ask the "everything else" list as one batch. Wait for answers before
-   generating files — don't scaffold speculatively and revise after.
-3. Scaffold:
+2. Check `docs/conventions.md` for anything already decided that applies
+   here.
+3. Ask the remainder of the "everything else" list — whatever the
+   conventions log didn't already resolve — as one batch. Wait for answers
+   before generating files — don't scaffold speculatively and revise
+   after.
+4. Scaffold:
    - Initialize bare RN + TypeScript (community CLI, no Expo).
    - Set `strict: true` in `tsconfig.json`.
    - Create the folder skeleton matching the chosen organization style —
      empty/minimal, not pre-populated with example screens the user didn't
      ask for.
-   - Install and wire up only what was explicitly answered for in step 2
-     (e.g. don't install a navigation library "just in case" if the user
-     said skip).
-4. Report clearly, in two lists: what was set up, and what was
+   - Install and wire up only what was explicitly answered for or resolved
+     by the conventions log (e.g. don't install a navigation library "just
+     in case" if the user said skip).
+5. Report clearly, in three lists: what was set up, what came from the
+   conventions log rather than being asked fresh, and what was
    deliberately left for the user to add later (anything skipped in step
-   2) — so nothing silently looks "decided" that wasn't.
+   3) — so nothing silently looks "decided" that wasn't.
 
 ## Notes
 - Never install Expo-only packages or suggest Expo-specific APIs.
