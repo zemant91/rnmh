@@ -16,7 +16,9 @@ description: "Use when writing or reviewing tests for a bare React Native + Type
 This skill is for interactive, in-conversation test writing — one exchange
 at a time, with the user able to steer or stop at any point. For an
 unattended sweep adding tests to untested logic across a larger area, see
-the `test-coverage-agent` subagent instead.
+the `test-coverage-agent` subagent instead. Both work from the same model —
+read `references/testing-trophy.md` in this skill's folder before deciding
+what layer a given test belongs to.
 
 ## Check what's already there before writing anything
 
@@ -31,14 +33,21 @@ skill doesn't default to a specific testing library on the user's behalf.
 
 ## What's worth testing
 
-Prioritize by value, not by coverage percentage:
-- Pure logic and business rules (validation, calculations, data
-  transforms) — highest value, cheapest to test reliably, no RN-specific
-  setup needed.
-- Custom hooks with real branching behavior (loading/error/success,
-  conditional derived state).
-- Components with conditional rendering, user interaction handling, or
-  logic beyond pure presentation.
+Prioritize by the Testing Trophy layers (`references/testing-trophy.md`),
+not by coverage percentage:
+- **Unit layer** — pure logic and business rules (validation, calculations,
+  data transforms): standalone, no rendering, no I/O. Cheapest and most
+  reliable place to test something, when isolating it loses nothing.
+- **Integration layer** — the default for anything with real behavior:
+  custom hooks with branching (loading/error/success, conditional derived
+  state), and components with conditional rendering or user interaction.
+  Render these with their real props/children, mocking only genuine I/O
+  boundaries (native modules, network) — not by isolating every
+  collaborator into a mock.
+- **E2E layer** — out of scope for this skill. If something can only be
+  verified through a full app flow, name it as a candidate for a separate,
+  deliberate E2E setup (Detox/Maestro) rather than forcing it into a
+  heavily mocked integration test.
 
 Skip, or say so explicitly, for:
 - Purely presentational components with no logic (props in, JSX out) — a
@@ -46,6 +55,8 @@ Skip, or say so explicitly, for:
   without catching real bugs.
 - Third-party library internals — test the project's usage of them, not
   their own behavior.
+- Anything static analysis already catches — don't write a test for a
+  case TypeScript's type system already makes unreachable.
 
 ## What NOT to do
 
@@ -90,8 +101,8 @@ Skip, or say so explicitly, for:
 
 1. Confirm the test setup already in the project (framework, existing
    conventions) rather than assuming.
-2. Decide what's actually worth testing in what's in scope, using the
-   prioritization above — say plainly if nothing here clears the bar,
+2. Decide what's actually worth testing in what's in scope, and which
+   Trophy layer it belongs to — say plainly if nothing here clears the bar,
    rather than writing a filler test.
 3. For each thing worth testing, cover the meaningful branches (success,
    error, edge/empty case), not just the happy path.

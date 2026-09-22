@@ -54,8 +54,10 @@ work.
 - `plugins/rnmh/skills/refactoring/references/fowler-catalog.md` — the
   named-technique catalog (7 chapters + code smells → technique mapping)
   shared by `refactoring` and `refactoring-agent`.
-- `plugins/rnmh/skills/testing/SKILL.md` — the testing priorities and
-  RN-specific mocking guidance shared by `testing` and
+- `plugins/rnmh/skills/testing/SKILL.md` and
+  `plugins/rnmh/skills/testing/references/testing-trophy.md` — the Testing
+  Trophy model (Kent C. Dodds) behind what's worth testing at which layer,
+  plus RN-specific mocking guidance, shared by `testing` and
   `test-coverage-agent`.
 
 ## Layout
@@ -78,6 +80,7 @@ plugins/
       security-review/SKILL.md
       rn-upgrade/SKILL.md
       testing/SKILL.md
+      testing/references/testing-trophy.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
