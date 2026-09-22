@@ -72,8 +72,9 @@ explicitly, then fix the bug as a distinct, separately described step.
 
 - Bare React Native + TypeScript, no Expo — a suggested extraction or move
   should not introduce an Expo-only dependency.
-- Check the project's own `rn-tools` UI kit (if present) before extracting a
-  new shared component — the extraction target may already exist.
+- Check the project's own shared/UI-kit package (if one exists) before
+  extracting a new shared component — the extraction target may already
+  exist there.
 - When applying **Introduce Parameter Object** or **Replace Primitive with
   Object**, give the new type a real TypeScript type/interface, not `any` or
   a loosely-typed object literal.

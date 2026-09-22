@@ -12,7 +12,11 @@ description: "Use when analyzing a UI reference (Dribbble/Mobbin link, screensho
 
 ## User context
 - Bare React Native + TypeScript, no Expo (dislikes Expo's paid tiers/ecosystem) — never suggest Expo-only libraries (expo-blur, etc.) without explicit confirmation.
-- Has an own UI-kit library `rn-tools` (npm) — check first whether it already covers the need before reaching for a third-party design system (Tamagui/NativeWind), unless asked otherwise.
+- Some projects have grown their own shared/UI-kit package — check whether
+  this project has one and whether it already covers the need before
+  reaching for a third-party design system (Tamagui/NativeWind), unless
+  asked otherwise. Don't assume one exists or guess its name; verify in
+  this project.
 - Runs several mobile apps in parallel — it matters that they don't converge into one "house style"; each should feel like its own thing.
 
 ## Step 1 — Break down the reference
@@ -87,7 +91,8 @@ When implementing, first lay out "move → how it's done in RN" explicitly, and 
 - Letter-spacing/caps typography → native `letterSpacing`/`textTransform`, no extra library needed.
 - Motion (spring, layout transitions, gesture-driven interactions) → Reanimated + Gesture Handler, not the Animated API — apply the spring config chosen in Step 5.
 - Accessibility props (accessibilityLabel, accessibilityRole, accessible, minimum hit slop) — apply the minimums from Step 6 as part of the same pass, not as a later cleanup step.
-- Components that already exist in `rn-tools` — check first, don't reinvent them.
+- Components that already exist in the project's own shared/UI-kit package
+  (if it has one) — check first, don't reinvent them.
 
 ## Step 9 — Judging "fresh" vs "dated" — check live, don't rely on a fixed list
 Don't keep a frozen list of "what's trendy" inside this skill — it goes stale within months and becomes exactly the kind of dated pattern this skill exists to catch. When the call between fresh and generic isn't obvious, or when asked what's currently well-regarded in a specific app category, do a quick web search or look at current shots on Mobbin/Dribbble in that category before asserting it from memory.

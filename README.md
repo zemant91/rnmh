@@ -26,6 +26,7 @@ these skills write or change files unless noted.
 | `release-checklist` | `/rnmh:release-checklist` | Before submitting to the App Store / Play Store, or cutting any production build | Three-way report: confirmed OK / blocker / gap, across versioning, signing, store compliance, rollout safety net | No |
 | `security-review` | `/rnmh:security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
 | `rn-upgrade` | `/rnmh:rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
+| `testing` | `/rnmh:testing` | Writing or reviewing tests for a component, hook, or piece of logic, interactively | What's worth testing, RN-specific mocking guidance (native modules, navigation, async state, animations), tests written against observable behavior | Yes — adds/edits test files |
 
 ## Agents
 
@@ -40,6 +41,7 @@ work.
 | `architecture-reviewer` | `rnmh:architecture-reviewer` | After a feature/PR is functionally done, before merging | Findings across 5 categories: naming/structure consistency, layer-boundary violations, error-handling consistency, RN-specific antipatterns, logic duplication — grouped, most impactful first | No |
 | `refactoring-agent` | `rnmh:refactoring-agent` | An unattended refactoring pass over a file/module/PR, broader than an interactive back-and-forth | Two-part report: **Applied** (with verification) and **Recommended, not applied** (with the reason it stopped) | Yes for safe/mechanical techniques (one commit per technique); no for anything structural — reported as a recommendation instead |
 | `cross-project-consistency` | `rnmh:cross-project-consistency` | Comparing 2+ of the user's parallel RN projects, not reviewing one project alone | Findings across 4 categories: duplicated components/utilities, naming/convention drift, shared-package drift, divergent solutions — evidence-based, never an arbitrary "reference project" | Only `docs/conventions.md`, once the user resolves an open question |
+| `test-coverage-agent` | `rnmh:test-coverage-agent` | An unattended pass adding tests to untested logic across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each test verified to actually fail on broken logic, not just pass) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when intended behavior is unclear — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -52,6 +54,9 @@ work.
 - `plugins/rnmh/skills/refactoring/references/fowler-catalog.md` — the
   named-technique catalog (7 chapters + code smells → technique mapping)
   shared by `refactoring` and `refactoring-agent`.
+- `plugins/rnmh/skills/testing/SKILL.md` — the testing priorities and
+  RN-specific mocking guidance shared by `testing` and
+  `test-coverage-agent`.
 
 ## Layout
 
@@ -72,41 +77,67 @@ plugins/
       release-checklist/SKILL.md
       security-review/SKILL.md
       rn-upgrade/SKILL.md
+      testing/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
       cross-project-consistency.md
+      test-coverage-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
 ```
 
-## Installation (from this repo, on your own machine)
+## Installation
+
+There are two different ways to install this, depending on which Claude
+surface is being used — they are not interchangeable, so use whichever
+matches what's actually open.
+
+### From the Claude Code CLI (terminal)
 
 ```bash
 # 1. Clone or already have this repo locally, e.g.:
 #    ~/Documents/Harness/rn-mobile-harness
 
-# 2. In Claude Code, register this repo as a plugin marketplace:
+# 2. Register this repo as a plugin marketplace:
 /plugin marketplace add ~/Documents/Harness/rn-mobile-harness
 
 # 3. Install the plugin from it:
 /plugin install rnmh@rn-mobile-harness
 ```
 
-That's it — no build step, no copying into `~/.claude`. Claude Code reads
-the plugin directly from this repo's `plugins/rnmh/` folder.
+No build step, no copying into `~/.claude`. Claude Code reads the plugin
+directly from this repo's `plugins/rnmh/` folder.
 
-**After editing a skill or agent file**, reload so Claude Code picks up
-the change:
+**After editing a skill or agent file**, reload so Claude Code picks up the
+change:
 
 ```
 /reload-plugins
 ```
 
-(Editing here and reloading is the whole workflow — there's no separate
-sync step anymore; an earlier version of this harness used a `sync.sh`
-copy script into `~/.claude`, which the plugin setup replaces entirely.)
+### From the Claude desktop app's Plugins panel
+
+The desktop app's Plugins screen (Settings → Plugins → "+ Add") installs
+from an uploaded `.zip` archive rather than a filesystem path — the
+marketplace-add flow above doesn't apply there. To install this way:
+
+1. Zip the plugin folder itself (not the whole repo) so `.claude-plugin/plugin.json`
+   ends up inside the archive's top-level `rnmh/` folder:
+   ```bash
+   cd ~/Documents/Harness/rn-mobile-harness/plugins
+   zip -r rnmh-plugin.zip rnmh -x "*.DS_Store"
+   ```
+2. In the Plugins panel, choose "+ Add" → "Upload local plugin" and drop
+   `rnmh-plugin.zip` (or browse to it).
+3. It should then show up under "Yours", and skills become invokable as
+   `/rnmh:<name>`.
+
+This upload is a **snapshot**, not a live link to the repo — after editing
+any skill/agent file, re-zip and re-upload to update the installed plugin.
+There's no reload command for this path the way `/reload-plugins` works in
+the CLI.
 
 ## Forking this for your own use
 
@@ -123,22 +154,20 @@ locally:
 3. Edit whichever skills/agents don't fit your stack or preferences — see
    each `SKILL.md`/agent file's own content; there's no central config,
    each file is self-contained.
-4. Point Claude Code at your local clone the same way as above:
-   ```
-   /plugin marketplace add /path/to/your-fork
-   /plugin install <your-plugin-name>@<marketplace-name-from-your-marketplace.json>
-   ```
-   (the marketplace name is whatever `name` you set in
-   `.claude-plugin/marketplace.json` — the repo's own name by default).
-5. While actively iterating on a fork, `claude --plugin-dir /path/to/your-fork/plugins/<your-plugin-name>`
+4. Install your fork with whichever method above matches your Claude
+   surface (CLI marketplace-add, or desktop-app zip upload).
+5. While actively iterating on a fork in the CLI,
+   `claude --plugin-dir /path/to/your-fork/plugins/<your-plugin-name>`
    loads the plugin for a single session without installing it — useful
    for quick trial-and-error before committing to the marketplace-install
    workflow above.
 
-Two files are worth reading before adjusting anything else, since other
+Three files are worth reading before adjusting anything else, since other
 pieces reference them: `docs/conventions.md` (the cross-project decisions
-log format) and `plugins/rnmh/skills/refactoring/references/fowler-catalog.md`
-(the refactoring vocabulary both the skill and the agent rely on).
+log format), `plugins/rnmh/skills/refactoring/references/fowler-catalog.md`
+(the refactoring vocabulary the refactoring skill/agent rely on), and
+`plugins/rnmh/skills/testing/SKILL.md` (the testing priorities the testing
+skill/agent rely on).
 
 ## Roadmap
 
@@ -158,11 +187,13 @@ Done:
 8. `security-review` skill — sensitive-data handling audit.
 9. `rn-upgrade` skill — safe RN version / native dependency upgrade process.
 10. Packaged as a real Claude Code plugin (`rnmh`), installable via a local
-    marketplace — replaces the earlier manual `sync.sh` copy-into-`~/.claude`
-    approach.
+    marketplace (CLI) or a zip upload (desktop app) — replaces the earlier
+    manual `sync.sh` copy-into-`~/.claude` approach.
+11. `testing` skill + `test-coverage-agent` — interactive and unattended test
+    writing for bare RN + TypeScript, with every added test verified to
+    actually fail on broken logic before counting as coverage.
 
 Planned next:
-11. Testing support — generation + maintenance of tests for components/logic.
 12. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
