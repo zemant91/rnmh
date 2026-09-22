@@ -5,47 +5,71 @@ Claude Code skills and subagents tailored to bare React Native + TypeScript
 work. Built for personal use first; parts of it may later become a shared
 product for other RN developers.
 
+Everything here lives under `~/.claude/` once synced (see below), so it's
+available in **any** project opened with Claude Code — no per-project setup.
+
+## Skills
+
+Skills are triggered automatically when a request matches their
+description, or explicitly by name (e.g. "use rn-diagnostics on this
+crash"). Explicit is more reliable while a skill is still new/untested.
+None of these skills write or change files unless noted.
+
+| Skill | Use when | Produces | Changes files? |
+|---|---|---|---|
+| `design-to-code` | Given a UI reference (Dribbble/Mobbin link, screenshot, Figma frame) to break down or build from | Grid/palette/typography breakdown, honest critique, anti-slop check, state coverage, move→RN-technology mapping | No (code only if separately asked) |
+| `refactoring` | Cleaning up existing code, extracting logic, responding to review feedback | Named-technique refactoring (Fowler catalog) applied in small, confirmed steps | Yes, incrementally, with confirmation at structural steps |
+| `project-bootstrap` | Starting a brand-new bare RN + TS project, or re-basing folder structure | A batch of setup questions, then a scaffolded project | Yes — creates the project skeleton |
+| `rn-diagnostics` | A crash, perf problem, bundler/Metro failure, native build/linking issue, or release-only/platform-only bug | Symptom classification, bucket-specific evidence gathered, confirmed root cause (or a named gap in evidence) | No (hands structural fixes to `refactoring`) |
+| `release-checklist` | Before submitting to the App Store / Play Store, or cutting any production build | Three-way report: confirmed OK / blocker / gap, across versioning, signing, store compliance, rollout safety net | No |
+| `security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
+| `rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
+
+## Agents
+
+Agents run as a separate subagent process with a fresh context — no memory
+of how the code under review was written. Triggered the same two ways as
+skills (automatic match, or explicit: "run architecture-reviewer on
+src/screens/"). Use these when the value is specifically in an unbiased
+second look, not for routine same-context work.
+
+| Agent | Use when | Produces | Changes files? |
+|---|---|---|---|
+| `architecture-reviewer` | After a feature/PR is functionally done, before merging | Findings across 5 categories: naming/structure consistency, layer-boundary violations, error-handling consistency, RN-specific antipatterns, logic duplication — grouped, most impactful first | No |
+| `refactoring-agent` | An unattended refactoring pass over a file/module/PR, broader than an interactive back-and-forth | Two-part report: **Applied** (with verification) and **Recommended, not applied** (with the reason it stopped) | Yes for safe/mechanical techniques (one commit per technique); no for anything structural — reported as a recommendation instead |
+| `cross-project-consistency` | Comparing 2+ of the user's parallel RN projects, not reviewing one project alone | Findings across 4 categories: duplicated components/utilities, naming/convention drift, shared-package drift, divergent solutions — evidence-based, never an arbitrary "reference project" | Only `docs/conventions.md`, once the user resolves an open question |
+
+## Shared reference
+
+- `docs/conventions.md` — a running log of naming/structure decisions made
+  along the way across projects, so nobody has to remember or re-decide
+  them. `project-bootstrap` reads it before asking its own questions;
+  `cross-project-consistency` reads it as settled ground truth and appends
+  new entries once the user resolves a divergence.
+- `skills/refactoring/references/fowler-catalog.md` — the named-technique
+  catalog (7 chapters + code smells → technique mapping) shared by
+  `refactoring` and `refactoring-agent`.
+
 ## Layout
 
 ```
-skills/                 Reusable, manually-invoked skills (Skill tool / slash commands)
-  design-to-code/         Turn a design reference (Dribbble/Mobbin link, screenshot,
-                          Figma frame) into a bare RN implementation plan + anti-slop
-                          do/don't rules.
-  refactoring/            Interactive refactoring using the named-technique catalog
-                          from Fowler's Refactoring (2nd ed.).
-    references/             Shared catalog (7 chapters + code smells -> technique
-                          mapping) used by both the skill and the refactoring agent.
-  project-bootstrap/      Scaffold a new bare RN + TS project — fixes only TS strict
-                          mode + a chosen folder-organization style; everything else
-                          is asked per-project, checking docs/conventions.md first.
-  rn-diagnostics/         Classify an RN bug (native crash / JS crash / perf /
-                          bundler-Metro / native build-linking, + dev-vs-release and
-                          platform-only modifiers) before gathering evidence.
-  release-checklist/      Pre-release checklist for App Store/Play Store: versioning,
-                          signing, store compliance, rollout/rollback safety net.
-  security-review/        Sensitive-data handling on-device and in transit: secret
-                          storage, logging, local encryption, transport, WebViews.
-  rn-upgrade/             Safe process for upgrading RN version and native
-                          dependencies — pre-checks, ordering, verification.
-agents/                 Subagent definitions (Agent tool) — specialized roles that
-                          run with their own prompt and a fresh, unbiased view of
-                          the code (no memory of how it was written).
-  architecture-reviewer.md     Reviews RN code for structural/architectural
-                          issues across five categories (see the agent file).
-  refactoring-agent.md         Unattended refactoring pass over a file/module/PR,
-                          same Fowler catalog, with a two-hats/safety protocol.
-  cross-project-consistency.md Compares 2+ of the user's RN projects for duplicated
-                          components/logic and naming/convention drift; reads and
-                          writes docs/conventions.md rather than picking a project
-                          as an arbitrary "reference".
+skills/
+  design-to-code/SKILL.md
+  refactoring/SKILL.md
+  refactoring/references/fowler-catalog.md
+  project-bootstrap/SKILL.md
+  rn-diagnostics/SKILL.md
+  release-checklist/SKILL.md
+  security-review/SKILL.md
+  rn-upgrade/SKILL.md
+agents/
+  architecture-reviewer.md
+  refactoring-agent.md
+  cross-project-consistency.md
 scripts/
-  sync.sh                 Copies skills/* and agents/* into ~/.claude — run after
-                          any change (see below).
+  sync.sh
 docs/
-  conventions.md          Running log of naming/structure decisions made along the
-                          way across projects — read by project-bootstrap, read and
-                          appended to by cross-project-consistency.
+  conventions.md
 ```
 
 ## How this is wired into Claude Code
