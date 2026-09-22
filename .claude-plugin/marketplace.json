@@ -1,0 +1,13 @@
+{
+  "name": "rn-mobile-harness",
+  "owner": {
+    "name": "Valiantsin"
+  },
+  "plugins": [
+    {
+      "name": "rnmh",
+      "source": "./plugins/rnmh",
+      "description": "Personal AI harness for React Native (bare RN + TypeScript) development"
+    }
+  ]
+}

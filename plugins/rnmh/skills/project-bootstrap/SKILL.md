@@ -59,9 +59,10 @@ Anything left unanswered is left out of the scaffold rather than defaulted
 
 ## Check the conventions log first
 
-Before asking the "everything else" list, read `docs/conventions.md` in
-this harness repo (`rn-mobile-harness`, wherever it's checked out — same
-place this skill file lives). It's a running log of naming/structure
+Before asking the "everything else" list, read `docs/conventions.md` at
+the root of the `rn-mobile-harness` repo this plugin was installed from
+(two levels up from this skill's own folder: `plugins/rnmh/skills/...` ->
+repo root -> `docs/conventions.md`). It's a running log of naming/structure
 decisions already made across the user's projects. For anything it already
 covers, apply it directly instead of asking again — only ask about what
 the log doesn't yet address. If the log resolves something that would

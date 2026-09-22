@@ -1,0 +1,8 @@
+{
+  "name": "rnmh",
+  "description": "Personal AI harness for React Native (bare RN + TypeScript) development: design-to-code, refactoring, architecture review, RN-specific diagnostics, release/security checklists, and safe RN upgrades.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Valiantsin"
+  }
+}
