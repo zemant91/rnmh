@@ -1,4 +1,4 @@
-# rn-mobile-harness
+# React Native Harness
 
 Personal AI harness for React Native development, packaged as a real
 **Claude Code plugin** (`rnmh`) — a growing collection of skills and
