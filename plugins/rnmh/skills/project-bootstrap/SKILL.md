@@ -46,9 +46,9 @@ batched set of questions, not one at a time):
 - Data-fetching/caching approach, if any is wanted now.
 - Lint/format baseline to start from (a specific community config, or a
   minimal custom one) — don't silently pick one.
-- Testing setup — note that a dedicated testing skill for this harness
-  doesn't exist yet, so the default answer is to skip test scaffolding for
-  now unless the user specifically wants a bare test runner wired up.
+- Testing setup — whether to wire up a bare test runner now (the harness's
+  own `testing` skill covers writing tests once code exists, but doesn't
+  itself install one), or skip test scaffolding for now.
 - Whether to drop in a project-level pointer to this harness (e.g. a short
   `CLAUDE.md` noting which harness skills/agents apply here) so Claude Code
   in this new repo picks up `design-to-code`, `architecture-reviewer`,
@@ -84,7 +84,14 @@ conversation) once the user actually makes a call, not invented here.
    conventions log didn't already resolve — as one batch. Wait for answers
    before generating files — don't scaffold speculatively and revise
    after.
-4. Scaffold:
+4. Restate the resulting setup as a short plan before creating anything —
+   package manager, navigation/state/data choices (from answers or the
+   conventions log), lint baseline, folder style — and wait for a
+   go-ahead. This is a conversational checkpoint, not a saved document: it
+   catches a misread answer before files exist, not a formal sign-off
+   step. Skip the wait only if the user's own message already confirmed
+   everything needed (e.g. they gave every answer and said "go").
+5. Scaffold:
    - Initialize bare RN + TypeScript (community CLI, no Expo).
    - Set `strict: true` in `tsconfig.json`.
    - Create the folder skeleton matching the chosen organization style —
@@ -93,7 +100,7 @@ conversation) once the user actually makes a call, not invented here.
    - Install and wire up only what was explicitly answered for or resolved
      by the conventions log (e.g. don't install a navigation library "just
      in case" if the user said skip).
-5. Report clearly, in three lists: what was set up, what came from the
+6. Report clearly, in three lists: what was set up, what came from the
    conventions log rather than being asked fresh, and what was
    deliberately left for the user to add later (anything skipped in step
    3) — so nothing silently looks "decided" that wasn't.

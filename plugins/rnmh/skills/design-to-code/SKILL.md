@@ -94,6 +94,11 @@ When implementing, first lay out "move → how it's done in RN" explicitly, and 
 - Components that already exist in the project's own shared/UI-kit package
   (if it has one) — check first, don't reinvent them.
 
+## Step 8b — State the plan and wait before writing code
+Before generating any implementation code, actively present the Step 8 mapping as a short plan rather than sliding straight into code: what's in scope for this pass (which screen(s)/component(s)/states from Step 4 are being built now), what's explicitly deferred or out of scope, and the move→technology choices from Step 8. Then wait for a go-ahead.
+
+This is a conversational checkpoint, not a saved document — the point is to catch a scope mismatch (wrong screen, missing state, an unwanted library choice) before code exists, not to add process for its own sake. Skip the wait only when the user has already confirmed scope in the same message (e.g. "build exactly this, go ahead").
+
 ## Step 9 — Judging "fresh" vs "dated" — check live, don't rely on a fixed list
 Don't keep a frozen list of "what's trendy" inside this skill — it goes stale within months and becomes exactly the kind of dated pattern this skill exists to catch. When the call between fresh and generic isn't obvious, or when asked what's currently well-regarded in a specific app category, do a quick web search or look at current shots on Mobbin/Dribbble in that category before asserting it from memory.
 
@@ -105,5 +110,5 @@ Once an implementation is close to final, offer (don't force) a follow-up struct
 2. Honest assessment of the reference (what's fresh, what's generic — verified live per Step 9 if the call isn't obvious).
 3. Anti-slop check — which checklist items would have been a trap this time.
 4. Archetype + state coverage — which states the reference shows and which are missing.
-5. RN implementation — move→technology mapping (including motion config and accessibility props), no finished code until explicitly asked for it.
+5. RN implementation plan — move→technology mapping (including motion config and accessibility props), presented as what's in/out of scope per Step 8b, with an explicit wait for confirmation before writing any code.
 6. If several references come up in one session, explicitly note how they differ from each other and what shouldn't be combined into a single screen.
