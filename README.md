@@ -63,6 +63,11 @@ work.
   before asking its own questions; `cross-project-consistency` reads it as
   settled ground truth and appends new entries once the user resolves a
   divergence.
+- `docs/harness-verification.md` (repo root, outside the plugin folder) —
+  the checklist and running log for actually dogfooding this harness
+  against real projects (auto-trigger disambiguation between overlapping
+  skills, content-quality checks, agent hit-rate) before adding anything
+  new to it.
 - `plugins/rnmh/skills/refactoring/references/fowler-catalog.md` — the
   named-technique catalog (7 chapters + code smells → technique mapping)
   shared by `refactoring` and `refactoring-agent`.
