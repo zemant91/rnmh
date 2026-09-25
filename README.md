@@ -77,6 +77,83 @@ work.
   plus RN-specific mocking guidance, shared by `testing` and
   `test-coverage-agent`.
 
+## Which skill/agent fits which project stage
+
+The tables above list what each skill/agent does; this maps them to when
+in a project's life they're actually worth reaching for. This isn't a new
+skill, just a navigation aid over the existing set — several entries apply
+at more than one stage, and none of this is a hard gate.
+
+### Starting a new project (no code yet)
+- `project-bootstrap` — the actual starting point: fixes strict TS and the
+  folder-style choice, asks everything else rather than assuming it.
+- `ci-cd-pipeline` — worth wiring up even minimally (lint/type-check
+  gating) from the start; cheaper to set up before there's much to
+  retrofit onto.
+- `feature-flags-remote-config` — only if gradual rollout/kill-switch
+  capability is a known day-one requirement; otherwise this is cheap to
+  add later and not worth setting up speculatively.
+
+### Early/active development (core screens and flows being built)
+- `design-to-code` — every time a new screen/flow is built from a
+  reference.
+- `refactoring` — continuously, as code accumulates and patterns repeat.
+- `testing` — once a piece of logic/component has stabilized enough that
+  testing it isn't wasted effort on something about to change shape.
+- `rn-diagnostics` — whenever a crash/perf/build issue comes up that isn't
+  a plain logic bug.
+- `push-deep-linking` — once the navigation/auth flows it needs to hook
+  into actually exist.
+- `localization` — if multi-locale is a known requirement, wiring it in
+  while screens are still being built is cheaper than retrofitting every
+  hardcoded string later.
+- `architecture-reviewer` — periodically, once there's enough structure to
+  actually review (not on day one with three files).
+
+### Codebase growing/stabilizing (more features, maybe more contributors)
+- `architecture-reviewer`, and `cross-project-consistency` once there's
+  more than one of your projects to compare — catching drift before it
+  compounds.
+- `refactoring-agent` / `test-coverage-agent` — unattended sweeps start
+  making sense once there's enough code that a manual pass-by-pass isn't
+  keeping up.
+- `feature-flags-remote-config` — this is usually when it actually starts
+  paying for itself, once there's enough surface area that decoupling
+  deploy from release matters.
+- `performance-audit` — once there's real usage/enough screens to profile;
+  auditing an app with three screens and no users mostly measures noise.
+
+### Pre-release (getting ready to ship or submit)
+- `release-checklist` — every time, non-negotiable before a store
+  submission.
+- `security-review` — before the app is trusted with anything sensitive,
+  and again before a major release if scope changed since the last pass.
+- `ci-cd-pipeline` — usually when store-delivery automation and full
+  gating actually get finished, if they weren't done from the start.
+- `analytics-crash-reporting` — must be live and verified (source maps
+  matching the exact build) before real users hit the release, not added
+  after the first crash report comes back unsymbolicated.
+
+### Post-release / production / maintenance
+- `rn-diagnostics` — the main tool once real users start reporting real
+  bugs.
+- `analytics-coverage-agent` / `feature-flags-audit-agent` — periodic
+  hygiene sweeps once there's an accumulated event/flag inventory worth
+  cleaning up.
+- `performance-audit` (and its agent) — periodic, now informed by real
+  production data instead of guesses.
+- `security-review` — periodic re-check, especially after adding a new
+  SDK/WebView/deep link.
+- `rn-upgrade` — whenever the RN version or native deps need to move
+  forward; triggered by upstream releases, not by project stage.
+
+### Stage-agnostic — triggered by the situation, not by project age
+`refactoring`, `rn-diagnostics`, `design-to-code` (any time new UI is
+built), and `security-review` (after adding any sensitive-data-adjacent
+capability) apply whenever their trigger condition is met, regardless of
+how old or new the project is.
+
+
 ## Layout
 
 ```
