@@ -32,6 +32,7 @@ these skills write or change files unless noted.
 | `push-deep-linking` | `/rnmh:push-deep-linking` | Setting up or reviewing push notifications and deep/universal/app links | Platform registration + token-lifecycle guidance, cold-start/killed-state routing checklist, custom-scheme vs. verified-domain tradeoffs | Yes — wires up handlers, notification and navigation setup |
 | `ci-cd-pipeline` | `/rnmh:ci-cd-pipeline` | Setting up or reviewing a CI/CD pipeline (build/test gating, caching, signing, store delivery) | Detected-setup-aware pipeline plan (stages/triggers/secrets), restated and confirmed before any config is created | Yes — creates/edits pipeline config, after an explicit go-ahead |
 | `feature-flags-remote-config` | `/rnmh:feature-flags-remote-config` | Introducing feature flags / remote config, or reviewing an existing flag inventory | Setup-aware flag additions with a named removal plan and safe default, offline/cold-start handling, and a security-boundary check | Yes — adds/edits flag definitions and usage |
+| `analytics-crash-reporting` | `/rnmh:analytics-crash-reporting` | Setting up or reviewing analytics/crash-reporting instrumentation | Setup-aware instrumentation coverage (screens, errors on both JS + native paths), event taxonomy, symbolication check | Yes — adds/edits tracking and error-reporting calls |
 
 ## Agents
 
@@ -52,6 +53,7 @@ work.
 | `push-deep-linking-agent` | `rnmh:push-deep-linking-agent` | An unattended pass checking push/deep-link handling for completeness across a file/module/PR | Two-part report: **Applied** (wiring an existing routing function to a missing cold-start/killed-state entry point, or relocating a closure-free background handler) and **Recommended, not applied** (everything needing a new decision or native/hosted config) | Yes for the narrow mechanical set only; no for new routing logic, channels, permissions, or native/hosted config — reported as a recommendation instead |
 | `ci-cd-audit-agent` | `rnmh:ci-cd-audit-agent` | An unattended audit of an already-existing CI/CD pipeline config for gaps | Two-part report: **Applied** (turning on an already-available cache option, gating an ungated deploy job, removing a secret-printing log line) and **Recommended, not applied** (everything needing a new secret, access, or restructuring decision) | Yes for the narrow mechanical set only; no for new secrets, restructuring, or provider/Fastlane introduction — reported as a recommendation instead |
 | `feature-flags-audit-agent` | `rnmh:feature-flags-audit-agent` | An unattended pass finding stale/orphaned feature flags across the whole codebase | Two-part report: **Applied** (removing a catalog entry with zero code references anywhere in the repo) and **Recommended, not applied** (a flag that looks decided but still has live references, or a code/catalog key mismatch) | Yes only for zero-reference catalog entries; no for anything with live references — reported as a recommendation instead |
+| `analytics-coverage-agent` | `rnmh:analytics-coverage-agent` | An unattended pass finding untracked screens/error paths across a file/module/PR | Two-part report: **Applied** (wiring a missing screen/error-report call using the project's own existing tracking convention) and **Recommended, not applied** (gaps with no existing convention to copy, or possible sensitive data) | Yes only when copying an already-established convention; no for a new event/SDK/judgment call — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -96,6 +98,7 @@ plugins/
       push-deep-linking/SKILL.md
       ci-cd-pipeline/SKILL.md
       feature-flags-remote-config/SKILL.md
+      analytics-crash-reporting/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
@@ -106,6 +109,7 @@ plugins/
       push-deep-linking-agent.md
       ci-cd-audit-agent.md
       feature-flags-audit-agent.md
+      analytics-coverage-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -242,8 +246,16 @@ Done:
     only removes a catalog entry with zero code references anywhere in the
     repo and never collapses a flag that still has live references, since
     it has no access to the flag's real rollout state.
+17. `analytics-crash-reporting` skill + `analytics-coverage-agent` —
+    instrumentation coverage (screens, JS + native error paths), event
+    taxonomy, and symbolication setup, cross-referencing `security-review`
+    (sensitive-field scrubbing), `ci-cd-pipeline` (source-map upload), and
+    `rn-diagnostics` (manual single-crash diagnosis); the unattended agent
+    only copies the project's own already-established tracking convention
+    to a missing screen/error path, never inventing a new event or SDK
+    call shape.
 
 Planned next:
-17. Eventually: publish for other RN developers (the marketplace piece is
+18. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
