@@ -79,7 +79,11 @@ device* and *in transit* with sensitive data.
 - Deep link / universal link handlers validate and sanitize incoming data
   before acting on it (navigating, prefilling a form, making a request) —
   treat deep link parameters as untrusted input, since they can be
-  constructed by anyone, not just the app's own share flow.
+  constructed by anyone, not just the app's own share flow. For getting
+  the routing itself wired up correctly (cold-start vs. live-event,
+  killed-state notification taps, scheme vs. verified-domain setup), see
+  the `push-deep-linking` skill — that's the setup side, this is the
+  hardening side.
 
 ### Screen/session exposure
 - Highly sensitive screens (balances, personal health data) are

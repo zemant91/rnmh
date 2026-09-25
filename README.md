@@ -29,6 +29,7 @@ these skills write or change files unless noted.
 | `testing` | `/rnmh:testing` | Writing or reviewing tests for a component, hook, or piece of logic, interactively | What's worth testing, RN-specific mocking guidance (native modules, navigation, async state, animations), tests written against observable behavior | Yes — adds/edits test files |
 | `localization` | `/rnmh:localization` | Setting up i18n, adding a locale, extracting hardcoded strings, handling pluralization/formatting/RTL | Detected-setup-aware key extraction, CLDR-aware pluralization guidance, locale-formatting and RTL notes | Yes — adds/edits locale files and translation-call sites |
 | `performance-audit` | `/rnmh:performance-audit` | A periodic/pre-release performance review — bundle size, startup time, render cost, lists, images/memory | Measurement-backed findings per category, ranked by confirmed impact, with `rn-diagnostics` handling active-complaint root cause instead | Only where a fix is both safe and already measurement-backed |
+| `push-deep-linking` | `/rnmh:push-deep-linking` | Setting up or reviewing push notifications and deep/universal/app links | Platform registration + token-lifecycle guidance, cold-start/killed-state routing checklist, custom-scheme vs. verified-domain tradeoffs | Yes — wires up handlers, notification and navigation setup |
 
 ## Agents
 
@@ -46,6 +47,7 @@ work.
 | `test-coverage-agent` | `rnmh:test-coverage-agent` | An unattended pass adding tests to untested logic across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each test verified to actually fail on broken logic, not just pass) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when intended behavior is unclear — reported as a recommendation instead |
 | `localization-coverage-agent` | `rnmh:localization-coverage-agent` | An unattended pass finding hardcoded/untranslated strings across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each extraction verified not to change default-locale rendering) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when no i18n setup exists yet or key placement is unclear — reported as a recommendation instead |
 | `performance-audit-agent` | `rnmh:performance-audit-agent` | An unattended pass applying narrow, measurement-independent performance fixes across a file/module/PR | Two-part report: **Applied** (a small mechanical set: keyExtractor, getItemLayout correctness, effect cleanup, already-flagged duplicate deps) and **Recommended, not applied** (everything needing a profiler/bundle measurement) | Yes for the narrow mechanical set only; no for anything needing measurement — reported as a recommendation instead |
+| `push-deep-linking-agent` | `rnmh:push-deep-linking-agent` | An unattended pass checking push/deep-link handling for completeness across a file/module/PR | Two-part report: **Applied** (wiring an existing routing function to a missing cold-start/killed-state entry point, or relocating a closure-free background handler) and **Recommended, not applied** (everything needing a new decision or native/hosted config) | Yes for the narrow mechanical set only; no for new routing logic, channels, permissions, or native/hosted config — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -87,6 +89,7 @@ plugins/
       testing/references/testing-trophy.md
       localization/SKILL.md
       performance-audit/SKILL.md
+      push-deep-linking/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
@@ -94,6 +97,7 @@ plugins/
       test-coverage-agent.md
       localization-coverage-agent.md
       performance-audit-agent.md
+      push-deep-linking-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -212,8 +216,14 @@ Done:
     complementing `rn-diagnostics`'s reactive Performance bucket; the
     unattended agent only applies a narrow, measurement-independent
     mechanical fix set and recommends everything else.
+14. `push-deep-linking` skill + `push-deep-linking-agent` — push
+    notification and universal/app-link setup, cold-start/killed-state
+    routing, and token lifecycle, cross-referencing `security-review` for
+    deep-link parameter validation; the unattended agent only wires
+    existing routing functions to missing entry points and never touches
+    native/hosted config.
 
 Planned next:
-14. Eventually: publish for other RN developers (the marketplace piece is
+15. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
