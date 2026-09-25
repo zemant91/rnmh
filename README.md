@@ -20,6 +20,7 @@ these skills write or change files unless noted.
 | Skill | Invoke as | Use when | Produces | Changes files? |
 |---|---|---|---|---|
 | `design-to-code` | `/rnmh:design-to-code` | Given a UI reference (Dribbble/Mobbin link, screenshot, Figma frame) to break down or build from | Grid/palette/typography breakdown, honest critique, anti-slop check, state coverage, move→RN-technology mapping | No (code only if separately asked) |
+| `feature-implementation` | `/rnmh:feature-implementation` | Building a full feature end to end — design through data/state, build, and tests | Orchestrates `design-to-code`/`testing`/instrumentation skills at the right points; adds requirements scoping, data/state integration, and a completion checklist | Yes — the whole feature, via the skills it orchestrates |
 | `refactoring` | `/rnmh:refactoring` | Cleaning up existing code, extracting logic, responding to review feedback | Named-technique refactoring (Fowler catalog) applied in small, confirmed steps | Yes, incrementally, with confirmation at structural steps |
 | `project-bootstrap` | `/rnmh:project-bootstrap` | Starting a brand-new bare RN + TS project, or re-basing folder structure | A batch of setup questions, then a scaffolded project | Yes — creates the project skeleton |
 | `rn-diagnostics` | `/rnmh:rn-diagnostics` | A crash, perf problem, bundler/Metro failure, native build/linking issue, or release-only/platform-only bug | Symptom classification, bucket-specific evidence gathered, confirmed root cause (or a named gap in evidence) | No (hands structural fixes to `refactoring`) |
@@ -95,8 +96,12 @@ at more than one stage, and none of this is a hard gate.
   add later and not worth setting up speculatively.
 
 ### Early/active development (core screens and flows being built)
+- `feature-implementation` — the default entry point for a full feature
+  (not just its UI): scopes it, orchestrates `design-to-code` and
+  `testing` in order, and adds the data/state/error-handling and
+  completion-checklist pieces neither of those covers on its own.
 - `design-to-code` — every time a new screen/flow is built from a
-  reference.
+  reference, whether standalone or as `feature-implementation`'s Step 1.
 - `refactoring` — continuously, as code accumulates and patterns repeat.
 - `testing` — once a piece of logic/component has stabilized enough that
   testing it isn't wasted effort on something about to change shape.
@@ -166,6 +171,7 @@ plugins/
       plugin.json            Plugin manifest (name: "rnmh").
     skills/
       design-to-code/SKILL.md
+      feature-implementation/SKILL.md
       refactoring/SKILL.md
       refactoring/references/fowler-catalog.md
       project-bootstrap/SKILL.md
@@ -336,8 +342,15 @@ Done:
     only copies the project's own already-established tracking convention
     to a missing screen/error path, never inventing a new event or SDK
     call shape.
+18. `feature-implementation` skill — orchestrates `design-to-code` and
+    `testing` (and the instrumentation skills where relevant) into one
+    end-to-end feature workflow, filling the gaps between them:
+    requirements scoping before a design exists, RN-specific data/state
+    integration, and a completion checklist crossing UI, logic, data, and
+    tests. Skill-only, no agent — this is judgment-heavy creative work
+    from end to end, not a narrow, mechanically-verifiable task.
 
 Planned next:
-18. Eventually: publish for other RN developers (the marketplace piece is
+19. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).

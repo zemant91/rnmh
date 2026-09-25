@@ -10,6 +10,11 @@ description: "Use when analyzing a UI reference (Dribbble/Mobbin link, screensho
 - The user asks to make any screen "beautiful/non-standard" with no reference given — in that case, first suggest 1-2 directions/references instead of jumping straight into a default layout.
 - Building or reviewing a UI component/flow in any bare RN project — use this alongside that project's own instructions, not instead of them.
 
+For a full feature end to end (data/state integration, testing,
+instrumentation, not just the UI), `feature-implementation` orchestrates
+this skill as its Step 1 rather than duplicating it — use that skill
+instead when the UI build is part of a bigger feature, not the whole task.
+
 ## User context
 - Bare React Native + TypeScript, no Expo (dislikes Expo's paid tiers/ecosystem) — never suggest Expo-only libraries (expo-blur, etc.) without explicit confirmation.
 - Some projects have grown their own shared/UI-kit package — check whether
