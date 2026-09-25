@@ -121,7 +121,10 @@ list to apply blindly:
    fixing a structural cause found this way (e.g. unstable references
    causing re-renders) can go through the `refactoring` skill in this
    harness rather than a one-off patch, if it's a pattern rather than a
-   one-line fix.
+   one-line fix. For a confirmed Performance-bucket root cause
+   specifically, `performance-audit` has the fix-technique catalog and the
+   surrounding checklist (list virtualization, memoization, bundle/startup
+   concerns) for that category.
 
 ## Output format
 

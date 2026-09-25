@@ -28,6 +28,7 @@ these skills write or change files unless noted.
 | `rn-upgrade` | `/rnmh:rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
 | `testing` | `/rnmh:testing` | Writing or reviewing tests for a component, hook, or piece of logic, interactively | What's worth testing, RN-specific mocking guidance (native modules, navigation, async state, animations), tests written against observable behavior | Yes — adds/edits test files |
 | `localization` | `/rnmh:localization` | Setting up i18n, adding a locale, extracting hardcoded strings, handling pluralization/formatting/RTL | Detected-setup-aware key extraction, CLDR-aware pluralization guidance, locale-formatting and RTL notes | Yes — adds/edits locale files and translation-call sites |
+| `performance-audit` | `/rnmh:performance-audit` | A periodic/pre-release performance review — bundle size, startup time, render cost, lists, images/memory | Measurement-backed findings per category, ranked by confirmed impact, with `rn-diagnostics` handling active-complaint root cause instead | Only where a fix is both safe and already measurement-backed |
 
 ## Agents
 
@@ -44,6 +45,7 @@ work.
 | `cross-project-consistency` | `rnmh:cross-project-consistency` | Comparing 2+ of the user's parallel RN projects, not reviewing one project alone | Findings across 4 categories: duplicated components/utilities, naming/convention drift, shared-package drift, divergent solutions — evidence-based, never an arbitrary "reference project" | Only `docs/conventions.md`, once the user resolves an open question |
 | `test-coverage-agent` | `rnmh:test-coverage-agent` | An unattended pass adding tests to untested logic across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each test verified to actually fail on broken logic, not just pass) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when intended behavior is unclear — reported as a recommendation instead |
 | `localization-coverage-agent` | `rnmh:localization-coverage-agent` | An unattended pass finding hardcoded/untranslated strings across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each extraction verified not to change default-locale rendering) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when no i18n setup exists yet or key placement is unclear — reported as a recommendation instead |
+| `performance-audit-agent` | `rnmh:performance-audit-agent` | An unattended pass applying narrow, measurement-independent performance fixes across a file/module/PR | Two-part report: **Applied** (a small mechanical set: keyExtractor, getItemLayout correctness, effect cleanup, already-flagged duplicate deps) and **Recommended, not applied** (everything needing a profiler/bundle measurement) | Yes for the narrow mechanical set only; no for anything needing measurement — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -84,12 +86,14 @@ plugins/
       testing/SKILL.md
       testing/references/testing-trophy.md
       localization/SKILL.md
+      performance-audit/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
       cross-project-consistency.md
       test-coverage-agent.md
       localization-coverage-agent.md
+      performance-audit-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -203,8 +207,13 @@ Done:
     string extraction, pluralization/formatting/RTL guidance, interactive
     and unattended, both refusing to invent an i18n library or a
     non-default-locale translation on their own.
+13. `performance-audit` skill + `performance-audit-agent` — bundle size,
+    startup time, render cost, lists, and image/memory audit categories,
+    complementing `rn-diagnostics`'s reactive Performance bucket; the
+    unattended agent only applies a narrow, measurement-independent
+    mechanical fix set and recommends everything else.
 
 Planned next:
-13. Eventually: publish for other RN developers (the marketplace piece is
+14. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
