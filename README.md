@@ -27,6 +27,7 @@ these skills write or change files unless noted.
 | `security-review` | `/rnmh:security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
 | `rn-upgrade` | `/rnmh:rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
 | `testing` | `/rnmh:testing` | Writing or reviewing tests for a component, hook, or piece of logic, interactively | What's worth testing, RN-specific mocking guidance (native modules, navigation, async state, animations), tests written against observable behavior | Yes — adds/edits test files |
+| `localization` | `/rnmh:localization` | Setting up i18n, adding a locale, extracting hardcoded strings, handling pluralization/formatting/RTL | Detected-setup-aware key extraction, CLDR-aware pluralization guidance, locale-formatting and RTL notes | Yes — adds/edits locale files and translation-call sites |
 
 ## Agents
 
@@ -42,6 +43,7 @@ work.
 | `refactoring-agent` | `rnmh:refactoring-agent` | An unattended refactoring pass over a file/module/PR, broader than an interactive back-and-forth | Two-part report: **Applied** (with verification) and **Recommended, not applied** (with the reason it stopped) | Yes for safe/mechanical techniques (one commit per technique); no for anything structural — reported as a recommendation instead |
 | `cross-project-consistency` | `rnmh:cross-project-consistency` | Comparing 2+ of the user's parallel RN projects, not reviewing one project alone | Findings across 4 categories: duplicated components/utilities, naming/convention drift, shared-package drift, divergent solutions — evidence-based, never an arbitrary "reference project" | Only `docs/conventions.md`, once the user resolves an open question |
 | `test-coverage-agent` | `rnmh:test-coverage-agent` | An unattended pass adding tests to untested logic across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each test verified to actually fail on broken logic, not just pass) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when intended behavior is unclear — reported as a recommendation instead |
+| `localization-coverage-agent` | `rnmh:localization-coverage-agent` | An unattended pass finding hardcoded/untranslated strings across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each extraction verified not to change default-locale rendering) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when no i18n setup exists yet or key placement is unclear — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -81,11 +83,13 @@ plugins/
       rn-upgrade/SKILL.md
       testing/SKILL.md
       testing/references/testing-trophy.md
+      localization/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
       cross-project-consistency.md
       test-coverage-agent.md
+      localization-coverage-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -195,8 +199,12 @@ Done:
 11. `testing` skill + `test-coverage-agent` — interactive and unattended test
     writing for bare RN + TypeScript, with every added test verified to
     actually fail on broken logic before counting as coverage.
+12. `localization` skill + `localization-coverage-agent` — i18n setup,
+    string extraction, pluralization/formatting/RTL guidance, interactive
+    and unattended, both refusing to invent an i18n library or a
+    non-default-locale translation on their own.
 
 Planned next:
-12. Eventually: publish for other RN developers (the marketplace piece is
+13. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
