@@ -31,6 +31,7 @@ these skills write or change files unless noted.
 | `performance-audit` | `/rnmh:performance-audit` | A periodic/pre-release performance review — bundle size, startup time, render cost, lists, images/memory | Measurement-backed findings per category, ranked by confirmed impact, with `rn-diagnostics` handling active-complaint root cause instead | Only where a fix is both safe and already measurement-backed |
 | `push-deep-linking` | `/rnmh:push-deep-linking` | Setting up or reviewing push notifications and deep/universal/app links | Platform registration + token-lifecycle guidance, cold-start/killed-state routing checklist, custom-scheme vs. verified-domain tradeoffs | Yes — wires up handlers, notification and navigation setup |
 | `ci-cd-pipeline` | `/rnmh:ci-cd-pipeline` | Setting up or reviewing a CI/CD pipeline (build/test gating, caching, signing, store delivery) | Detected-setup-aware pipeline plan (stages/triggers/secrets), restated and confirmed before any config is created | Yes — creates/edits pipeline config, after an explicit go-ahead |
+| `feature-flags-remote-config` | `/rnmh:feature-flags-remote-config` | Introducing feature flags / remote config, or reviewing an existing flag inventory | Setup-aware flag additions with a named removal plan and safe default, offline/cold-start handling, and a security-boundary check | Yes — adds/edits flag definitions and usage |
 
 ## Agents
 
@@ -50,6 +51,7 @@ work.
 | `performance-audit-agent` | `rnmh:performance-audit-agent` | An unattended pass applying narrow, measurement-independent performance fixes across a file/module/PR | Two-part report: **Applied** (a small mechanical set: keyExtractor, getItemLayout correctness, effect cleanup, already-flagged duplicate deps) and **Recommended, not applied** (everything needing a profiler/bundle measurement) | Yes for the narrow mechanical set only; no for anything needing measurement — reported as a recommendation instead |
 | `push-deep-linking-agent` | `rnmh:push-deep-linking-agent` | An unattended pass checking push/deep-link handling for completeness across a file/module/PR | Two-part report: **Applied** (wiring an existing routing function to a missing cold-start/killed-state entry point, or relocating a closure-free background handler) and **Recommended, not applied** (everything needing a new decision or native/hosted config) | Yes for the narrow mechanical set only; no for new routing logic, channels, permissions, or native/hosted config — reported as a recommendation instead |
 | `ci-cd-audit-agent` | `rnmh:ci-cd-audit-agent` | An unattended audit of an already-existing CI/CD pipeline config for gaps | Two-part report: **Applied** (turning on an already-available cache option, gating an ungated deploy job, removing a secret-printing log line) and **Recommended, not applied** (everything needing a new secret, access, or restructuring decision) | Yes for the narrow mechanical set only; no for new secrets, restructuring, or provider/Fastlane introduction — reported as a recommendation instead |
+| `feature-flags-audit-agent` | `rnmh:feature-flags-audit-agent` | An unattended pass finding stale/orphaned feature flags across the whole codebase | Two-part report: **Applied** (removing a catalog entry with zero code references anywhere in the repo) and **Recommended, not applied** (a flag that looks decided but still has live references, or a code/catalog key mismatch) | Yes only for zero-reference catalog entries; no for anything with live references — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -93,6 +95,7 @@ plugins/
       performance-audit/SKILL.md
       push-deep-linking/SKILL.md
       ci-cd-pipeline/SKILL.md
+      feature-flags-remote-config/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
@@ -102,6 +105,7 @@ plugins/
       performance-audit-agent.md
       push-deep-linking-agent.md
       ci-cd-audit-agent.md
+      feature-flags-audit-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -232,8 +236,14 @@ Done:
     the unattended agent only audits an already-existing pipeline config
     and applies a narrow, already-anchored fix set, never creating a new
     secret or restructuring the pipeline itself.
+16. `feature-flags-remote-config` skill + `feature-flags-audit-agent` —
+    flag lifecycle/staleness, safe defaults, offline/cold-start handling,
+    and where a flag stops being a security boundary; the unattended agent
+    only removes a catalog entry with zero code references anywhere in the
+    repo and never collapses a flag that still has live references, since
+    it has no access to the flag's real rollout state.
 
 Planned next:
-16. Eventually: publish for other RN developers (the marketplace piece is
+17. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
