@@ -13,7 +13,11 @@ description: "Use before submitting a bare React Native app to the App Store or 
 Not a substitute for the account's general `engineering:deploy-checklist`
 skill where that applies (CI status, approvals) — this is the layer
 specific to what actually blocks or burns a mobile store release, which a
-generic deploy checklist doesn't cover.
+generic deploy checklist doesn't cover. This skill is the manual,
+pre-submission walk-through; `ci-cd-pipeline` is for automating the same
+concerns (gating, signing, artifact/source-map retention) into the
+pipeline itself so they don't rely on someone remembering to run through
+this list every time.
 
 ## Versioning
 

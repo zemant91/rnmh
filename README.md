@@ -30,6 +30,7 @@ these skills write or change files unless noted.
 | `localization` | `/rnmh:localization` | Setting up i18n, adding a locale, extracting hardcoded strings, handling pluralization/formatting/RTL | Detected-setup-aware key extraction, CLDR-aware pluralization guidance, locale-formatting and RTL notes | Yes — adds/edits locale files and translation-call sites |
 | `performance-audit` | `/rnmh:performance-audit` | A periodic/pre-release performance review — bundle size, startup time, render cost, lists, images/memory | Measurement-backed findings per category, ranked by confirmed impact, with `rn-diagnostics` handling active-complaint root cause instead | Only where a fix is both safe and already measurement-backed |
 | `push-deep-linking` | `/rnmh:push-deep-linking` | Setting up or reviewing push notifications and deep/universal/app links | Platform registration + token-lifecycle guidance, cold-start/killed-state routing checklist, custom-scheme vs. verified-domain tradeoffs | Yes — wires up handlers, notification and navigation setup |
+| `ci-cd-pipeline` | `/rnmh:ci-cd-pipeline` | Setting up or reviewing a CI/CD pipeline (build/test gating, caching, signing, store delivery) | Detected-setup-aware pipeline plan (stages/triggers/secrets), restated and confirmed before any config is created | Yes — creates/edits pipeline config, after an explicit go-ahead |
 
 ## Agents
 
@@ -48,6 +49,7 @@ work.
 | `localization-coverage-agent` | `rnmh:localization-coverage-agent` | An unattended pass finding hardcoded/untranslated strings across a file/module/PR, broader than an interactive session | Two-part report: **Applied** (each extraction verified not to change default-locale rendering) and **Recommended, not applied** (gaps needing a human decision) | Yes for unambiguous cases (one commit per file/module); no when no i18n setup exists yet or key placement is unclear — reported as a recommendation instead |
 | `performance-audit-agent` | `rnmh:performance-audit-agent` | An unattended pass applying narrow, measurement-independent performance fixes across a file/module/PR | Two-part report: **Applied** (a small mechanical set: keyExtractor, getItemLayout correctness, effect cleanup, already-flagged duplicate deps) and **Recommended, not applied** (everything needing a profiler/bundle measurement) | Yes for the narrow mechanical set only; no for anything needing measurement — reported as a recommendation instead |
 | `push-deep-linking-agent` | `rnmh:push-deep-linking-agent` | An unattended pass checking push/deep-link handling for completeness across a file/module/PR | Two-part report: **Applied** (wiring an existing routing function to a missing cold-start/killed-state entry point, or relocating a closure-free background handler) and **Recommended, not applied** (everything needing a new decision or native/hosted config) | Yes for the narrow mechanical set only; no for new routing logic, channels, permissions, or native/hosted config — reported as a recommendation instead |
+| `ci-cd-audit-agent` | `rnmh:ci-cd-audit-agent` | An unattended audit of an already-existing CI/CD pipeline config for gaps | Two-part report: **Applied** (turning on an already-available cache option, gating an ungated deploy job, removing a secret-printing log line) and **Recommended, not applied** (everything needing a new secret, access, or restructuring decision) | Yes for the narrow mechanical set only; no for new secrets, restructuring, or provider/Fastlane introduction — reported as a recommendation instead |
 
 ## Shared reference
 
@@ -90,6 +92,7 @@ plugins/
       localization/SKILL.md
       performance-audit/SKILL.md
       push-deep-linking/SKILL.md
+      ci-cd-pipeline/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
@@ -98,6 +101,7 @@ plugins/
       localization-coverage-agent.md
       performance-audit-agent.md
       push-deep-linking-agent.md
+      ci-cd-audit-agent.md
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
@@ -222,8 +226,14 @@ Done:
     deep-link parameter validation; the unattended agent only wires
     existing routing functions to missing entry points and never touches
     native/hosted config.
+15. `ci-cd-pipeline` skill + `ci-cd-audit-agent` — CI/CD setup and audit
+    (caching, gating, signing/secrets, artifact/source-map retention,
+    store delivery), automating what `release-checklist` covers manually;
+    the unattended agent only audits an already-existing pipeline config
+    and applies a narrow, already-anchored fix set, never creating a new
+    secret or restructuring the pipeline itself.
 
 Planned next:
-15. Eventually: publish for other RN developers (the marketplace piece is
+16. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
