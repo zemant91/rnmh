@@ -9,11 +9,12 @@ speculative "this might be wrong."
 
 ## How this is used
 
-- Work through the batches below in order — Batch 1 is cheap and checks a
-  structural risk (auto-trigger collisions between overlapping skills)
-  before spending real time on content quality. Batches 2 and 3 use
-  actual project work, not synthetic tests, since that's the only way to
-  tell whether a skill's guidance holds up.
+- Work through the batches below in order — Batches 1 and 2 are cheap and
+  check structural risk (which skill fires at all, and whether a skill
+  that does fire actually follows its own internal handoffs) before
+  spending real time on content quality. Batches 3 and 4 use actual
+  project work, not synthetic tests, since that's the only way to tell
+  whether a skill's guidance holds up.
 - After each test, append an entry in the format below — plain text back
   in conversation is fine too, but capturing it here means a finding isn't
   lost, and it's the same running-log pattern `conventions.md` already
@@ -48,7 +49,47 @@ slash commands, and note what actually fires:
 - "хочу автоматизировать сборку и тесты" — expected `ci-cd-pipeline`,
   should have the least overlap of the set.
 
-## Batch 2 — content quality on real work
+## Batch 2 — internal step-chaining reliability (feature-implementation)
+
+`feature-implementation`'s steps reference other skills by name
+(`design-to-code` at Step 1, `testing` at Step 5) as plain text in its own
+SKILL.md — nothing forces those handoffs to actually happen. A live
+session may just improvise from a vague memory of what the other skill
+says instead of actually reading/applying it. This is a different failure
+mode than Batch 1: that one is about which skill fires at all; this one is
+about whether a skill that *did* fire actually follows its own internal
+references once running. Check, the next real time `feature-implementation`
+runs (or is meant to run) on an actual feature:
+
+- Did `feature-implementation` actually get invoked (auto-triggered or
+  explicit), or did a different skill (`design-to-code`, or nothing) fire
+  instead for a natural "add feature X" request?
+- At Step 1, did the model actually apply `design-to-code`'s full process
+  (breakdown, anti-slop check, state coverage, motion, accessibility,
+  platform idioms), or skip straight to UI code with only a rough
+  paraphrase?
+- At Step 3, did the model actually stop and wait for a go-ahead before
+  writing code, or proceed straight through?
+- At Step 5, did the model actually apply `testing`'s Trophy-layer
+  guidance and RN-specific mocking concerns, or write generic tests
+  without consulting that skill?
+- At Step 6, was the completion checklist actually run and reported
+  honestly (including anything left incomplete), or skipped/rubber-
+  stamped?
+
+## rn-app-driver — tested while building it (2026-09-26)
+
+Built and exercised against a real app (pain tracker, iOS 27 simulator,
+Xcode 27) in the same session, so it starts out dogfooded rather than
+untested: screen snapshot on Home/History/AttackDetail, real taps on tabs
+and a stack back button, scroll inside a list, offscreen refusal,
+data-changing refusal (`icon:Trash`). Not yet exercised: `type`, `--long`,
+Android. Findings fixed along the way: Metro needs an `Origin` header; RN's
+Promise polyfill breaks CDP `awaitPromise`; AXe's default tap style doesn't
+reach RN `Pressable`s on iOS 27 (touch down/up does); settle must wait for
+the first change before treating the screen as stable.
+
+## Batch 3 — content quality on real work
 
 Use these the next time real work naturally calls for them — not a
 contrived test case:
@@ -68,7 +109,7 @@ contrived test case:
   Process step 4) actually gets followed in practice or reads as
   unnecessary friction.
 
-## Batch 3 — agent hit-rate
+## Batch 4 — agent hit-rate
 
 The newer agents' "apply directly" sets were deliberately kept narrow.
 Run at least one to see whether that narrowness makes them mostly a
