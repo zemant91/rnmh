@@ -80,7 +80,18 @@ difference between this skill and `feature-implementation`'s normal flow.
    - whichever of `feature-flags-audit-agent`, `push-deep-linking-agent`,
      or `analytics-coverage-agent` matches what the checkpoint flagged
      beyond plain UI+logic
-5. **Consolidate.** Apply what each agent already applies directly per its
+5. **Commit — its own step, unconditional.** Once build, test, on-device
+   verification, and the review pass are done, commit the work to a
+   feature branch. Do this regardless of whether a remote is configured —
+   a missing remote only changes step 6, never this one. A real dogfood
+   run skipped this entirely when it was only mentioned inside the
+   report/PR step instead of standing on its own — that's why it's a
+   separate, explicit action here rather than folded into step 6 or 7.
+6. **Push and open a PR — only if a remote is configured and reachable.**
+   If there's no remote, or it isn't reachable, say so plainly in the
+   final report instead: the commits from step 5 still exist on the
+   branch, just not pushed.
+7. **Consolidate.** Apply what each agent already applies directly per its
    own safety protocol — that's how those agents already work, this skill
    doesn't change it. Collect everything every agent reported as
    "Recommended, not applied" into one combined list in the final report,
@@ -101,9 +112,8 @@ difference between this skill and `feature-implementation`'s normal flow.
 - Whether this actually ends at a pushed, opened PR depends on the
   project having a git remote already configured and reachable (e.g.
   GitHub) — not just a local repo. If no remote is configured, say so at
-  the checkpoint: the pipeline still produces tested, reviewed commits on
-  a branch, just not a pushed/opened PR, and pushing plus opening the PR
-  become a manual step once a remote exists.
+  the checkpoint. This never skips the commit itself (see step 5 below) —
+  only whether step 6 can also push and open a PR.
 
 ## After the report — applying recommendations
 
@@ -131,13 +141,17 @@ user actually said that.
    noting what each one applied versus recommended.
 7. Apply `security-review`'s checklist directly if the feature touches
    anything sensitive.
-8. Produce one consolidated report: what was built, what
-   testing/on-device verification confirmed, what each agent applied, and
-   everything still open as a numbered recommendation. If a git remote is
-   configured and reachable, push the branch and open the PR; if not, say
-   so plainly and stop at local, tested, reviewed commits on a branch.
-   Merging and shipping stay manual either way.
-9. If the user then names specific recommendations to apply, treat it as
-   one explicit follow-up pass — apply only those, re-verify what they
-   touch, and update the report. Don't do this unless asked, and don't
-   quietly widen it beyond what was named.
+8. Commit the work to a feature branch. Do this unconditionally — with or
+   without a remote, finished or with open recommendations still listed.
+9. If a git remote is configured and reachable, push the branch and open
+   the PR; if not, say so plainly — the branch from step 8 still has its
+   commits, just not pushed.
+10. Produce one consolidated report: what was built, what
+    testing/on-device verification confirmed, what each agent applied,
+    whether step 9 pushed/opened a PR or stopped at local commits, and
+    everything still open as a numbered recommendation. Merging and
+    shipping stay manual either way.
+11. If the user then names specific recommendations to apply, treat it as
+    one explicit follow-up pass — apply only those, re-verify what they
+    touch, and update the report. Don't do this unless asked, and don't
+    quietly widen it beyond what was named.

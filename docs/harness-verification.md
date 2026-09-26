@@ -192,4 +192,60 @@ reporting tool rather than real automation:
     report lists recommendations numbered, and applying any of them is one
     explicit follow-up pass only when the user names which ones.
 
+### 2026-09-27 — feature-pipeline (second real run, same feature)
+
+- Tested on: PocketSpotter, follow-up to the 2026-09-26 run — bottom tab
+  navigation (5 tabs), resolving the open "Start Workout target" question
+  from that run in favor of a tab.
+- Trigger: explicit (`feature-pipeline` run again from Claude Code).
+- Held up:
+  - Findings this round were concretely useful and non-obvious: missing
+    `flex: 1` on tabs (silent dead-zone tap targets, no visual symptom),
+    safe-area/orientation gap on iPad/Android rotation, a color-contrast
+    check on the exact inactive-label color/size the design specified
+    (correctly framed as a design call, not overridden), and a genuinely
+    subtle one — Home never unmounting means a stale date/training day if
+    the app stays open past midnight.
+  - `test-coverage-agent` correctly added nothing and said why (no RNTL
+    installed, no pure logic to unit-test in this diff) instead of
+    inventing a test harness — matches its own restriction.
+  - `security-review` correctly self-skipped again (no network/sensitive
+    data in this diff).
+  - The "list recommendations, apply nothing automatically" policy from
+    the previous fix visibly held: the report explicitly stated "ничего
+    из этого не применено."
+  - Correctly deferred a couple of found issues instead of unilaterally
+    fixing them: a type-import direction that's technically backwards but
+    is already how this project's own `CLAUDE.md` says to do it (respected
+    the existing convention over a textbook fix), and the Start-Workout
+    routing question was surfaced as an open product decision rather than
+    picked on its own.
+- Didn't hold up:
+  - **No commit happened at all** — not even a local one — despite the
+    previous fix explicitly saying the pipeline should still produce
+    "tested, reviewed commits on a branch" without a remote. Root cause:
+    that instruction was folded into the same sentence as the report/PR
+    step instead of being its own action, so the live run appears to have
+    skipped it entirely. This is a concrete, observed instance of exactly
+    what Batch 2 warned about in the abstract — a soft/buried instruction
+    not getting followed.
+  - `rn-app-driver`: swipe-to-scroll via AXe didn't move the list; had to
+    scroll through the simulator's own hardware panel instead.
+  - `rn-app-driver`: a scroll on the Home screen was reported under
+    `@Tabs/scroll` rather than the screen's own `home/scroll` testID —
+    looks like the component-tree walk is misattributing an element to
+    the enclosing tab navigator once a bottom tab bar is in the tree.
+- Fix applied:
+  - `feature-pipeline`'s "What runs afterward" list and Process now treat
+    commit as its own unconditional step (new step 5 / Process step 8),
+    separate from push/PR (step 6 / step 9) — a missing remote can no
+    longer read as "skip the commit too."
+- Fix still open:
+  - The two `rn-app-driver` findings above (scroll-via-AXe not reaching
+    the list, testID misattribution under a tab navigator) are gaps in
+    `rn-app-driver` itself, not `feature-pipeline` — need a session
+    working directly with `rn-app-driver` on a tab-based screen to
+    reproduce and fix, same as the fixes already logged in its own section
+    above.
+
 (nothing else verified yet)
