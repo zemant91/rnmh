@@ -140,4 +140,51 @@ reporting tool rather than real automation:
 
 ## Log
 
-(empty — nothing verified yet)
+### 2026-09-26 — feature-pipeline (first real run)
+- Tested on: PocketSpotter (gym-rep-counter-app), brand-new repo, "Exercises
+  list" screen (catalog + group filters), iPhone 17 Pro simulator via
+  `rn-app-driver`.
+- Trigger: explicit (`feature-pipeline` run directly from Claude Code).
+- Held up:
+  - Scoped itself to one useful slice (exercise catalog + filtered list)
+    instead of trying to build the whole v1 backlog at once.
+  - Picked only the relevant agents (`refactoring-agent`,
+    `test-coverage-agent`, `architecture-reviewer`) and explicitly skipped
+    `security-review` with a stated reason (no sensitive data in this
+    feature) — the self-scoping worked as designed.
+  - `test-coverage-agent` actually applied 2 new tests (id uniqueness,
+    every group has a filter), each verified against broken logic — matches
+    its mutation-testing bar, not just a recommendation.
+  - `rn-app-driver` refused to claim a synthetic back-swipe worked when it
+    didn't actually navigate, and reported it as an open finding instead of
+    quietly moving on — the "don't fake what you didn't verify" discipline
+    held under real use.
+  - Found a real architecture issue: the exercise catalog (`squat`-style
+    ids) and the workout-program data (`e1`...`e12` ids) are linked only by
+    name, which would break `Log Set` later — a genuine catch, not busywork.
+  - Handled a real tool gap transparently: the Figma MCP can't read node
+    data from Make-file sources, so it fell back to reading the rendered
+    preview (text/sizes/colors) and said so upfront rather than silently
+    guessing at fidelity.
+- Didn't hold up / open questions:
+  - Unclear whether the single upfront checkpoint (scope + design +
+    data/state proposed together, one go-ahead) actually happened — the
+    report jumps straight to "what was done." Needs confirming with
+    Valiantsin whether it was shown and approved, or skipped entirely.
+  - The run did not reach a committed, reviewed PR — it stopped
+    uncommitted, mid-decision (back button vs. tab bar, discovered because
+    the built screen has no way to leave it — a real a11y/navigation gap,
+    not a false alarm). This plausibly matches the skill's own "stop if
+    scope genuinely changes mid-pipeline" exception rather than a broken
+    single-checkpoint rule, but it's the first live data point that
+    "ends at a tested, reviewed PR" is the common case, not a guarantee —
+    worth watching whether unresolved-mid-pipeline becomes frequent.
+  - `refactoring-agent` and `architecture-reviewer` made zero applied
+    edits between them (7 recommendations total) — consistent with their
+    deliberately narrow "apply directly" sets from Batch 4's own framing,
+    but one more data point before calling that ratio normal.
+- Fix: none yet — first run tracked close to spec; pending Valiantsin's
+  answer on the checkpoint question above before deciding if anything
+  needs changing.
+
+(nothing else verified yet)
