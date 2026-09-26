@@ -25,6 +25,11 @@ process, collapsed to one confirmation and then run straight through.
   than silently re-deciding it.
 - Never treats a subagent's "Recommended, not applied" finding as
   resolved. Those go into the final report as open items, not swept under.
+- Never re-runs its own review pass to auto-fix the recommendations it
+  just produced. Every recommendation is an open item in the final
+  report; applying any of them is a separate, explicit follow-up the
+  user asks for by naming which ones — never a repeat cycle this skill
+  decides to run on its own initiative.
 
 ## The one checkpoint — scope, design, and data/state in a single message
 
@@ -93,6 +98,22 @@ difference between this skill and `feature-implementation`'s normal flow.
   because that distinction is what makes the chaining reliable (see
   `docs/harness-verification.md`, Batch 2, for why a soft cross-reference
   alone isn't enough).
+- Whether this actually ends at a pushed, opened PR depends on the
+  project having a git remote already configured and reachable (e.g.
+  GitHub) — not just a local repo. If no remote is configured, say so at
+  the checkpoint: the pipeline still produces tested, reviewed commits on
+  a branch, just not a pushed/opened PR, and pushing plus opening the PR
+  become a manual step once a remote exists.
+
+## After the report — applying recommendations
+
+The consolidated report lists every open recommendation, numbered. Do not
+act on any of them yet. If the user then names which ones to apply, treat
+that as one explicit, separate follow-up pass: apply only the named
+items, re-run whatever tests/on-device checks that change touches, and
+update the report to reflect what changed. Never launch this pass
+unprompted, and never expand it to "everything on the list" unless the
+user actually said that.
 
 ## Process
 
@@ -112,5 +133,11 @@ difference between this skill and `feature-implementation`'s normal flow.
    anything sensitive.
 8. Produce one consolidated report: what was built, what
    testing/on-device verification confirmed, what each agent applied, and
-   everything still open as a recommendation. Stop there — merging and
-   shipping stay manual.
+   everything still open as a numbered recommendation. If a git remote is
+   configured and reachable, push the branch and open the PR; if not, say
+   so plainly and stop at local, tested, reviewed commits on a branch.
+   Merging and shipping stay manual either way.
+9. If the user then names specific recommendations to apply, treat it as
+   one explicit follow-up pass — apply only those, re-verify what they
+   touch, and update the report. Don't do this unless asked, and don't
+   quietly widen it beyond what was named.

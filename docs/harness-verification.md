@@ -166,25 +166,30 @@ reporting tool rather than real automation:
     data from Make-file sources, so it fell back to reading the rendered
     preview (text/sizes/colors) and said so upfront rather than silently
     guessing at fidelity.
-- Didn't hold up / open questions:
-  - Unclear whether the single upfront checkpoint (scope + design +
-    data/state proposed together, one go-ahead) actually happened — the
-    report jumps straight to "what was done." Needs confirming with
-    Valiantsin whether it was shown and approved, or skipped entirely.
-  - The run did not reach a committed, reviewed PR — it stopped
-    uncommitted, mid-decision (back button vs. tab bar, discovered because
-    the built screen has no way to leave it — a real a11y/navigation gap,
-    not a false alarm). This plausibly matches the skill's own "stop if
-    scope genuinely changes mid-pipeline" exception rather than a broken
-    single-checkpoint rule, but it's the first live data point that
-    "ends at a tested, reviewed PR" is the common case, not a guarantee —
-    worth watching whether unresolved-mid-pipeline becomes frequent.
+- Didn't hold up / open questions (resolved):
+  - Single upfront checkpoint: confirmed it did happen — Valiantsin
+    approved the plan before any code was written ("да, подтверждал
+    реализацию, нельзя отдавать на 100% работу агентам"). Matches spec.
+  - Run didn't reach a pushed/opened PR because the project only had a
+    local git repo, no configured remote — not a chaining failure, just an
+    unstated prerequisite. `feature-pipeline`'s SKILL.md now names this
+    explicitly at the checkpoint and falls back to "tested, reviewed local
+    commits" when no remote exists, instead of silently promising a PR it
+    can't open.
   - `refactoring-agent` and `architecture-reviewer` made zero applied
     edits between them (7 recommendations total) — consistent with their
-    deliberately narrow "apply directly" sets from Batch 4's own framing,
-    but one more data point before calling that ratio normal.
-- Fix: none yet — first run tracked close to spec; pending Valiantsin's
-  answer on the checkpoint question above before deciding if anything
-  needs changing.
+    deliberately narrow "apply directly" sets, one data point toward that
+    ratio being normal rather than a gap.
+- Fix applied:
+  - Added a git-remote check to `feature-pipeline`'s checkpoint
+    constraints (say upfront if there's no remote to push/open a PR
+    against).
+  - Added an explicit "After the report — applying recommendations"
+    policy: never auto-loop the review pass to silently fix its own
+    findings (two of this run's 7 recommendations were real product/UX
+    decisions — back button vs. tab bar, where a shared type lives — not
+    things an agent should resolve on its own). Instead, the consolidated
+    report lists recommendations numbered, and applying any of them is one
+    explicit follow-up pass only when the user names which ones.
 
 (nothing else verified yet)
