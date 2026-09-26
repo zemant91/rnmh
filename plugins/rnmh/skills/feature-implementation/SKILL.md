@@ -24,6 +24,10 @@ concerns that don't live in any single existing skill: scoping a feature
 before design exists, data/state integration, and a cross-cutting
 completion check.
 
+For the same process run hands-off after a single upfront confirmation
+instead of a checkpoint at every step — ending at a tested, reviewed PR
+rather than stopping for review at each stage — see `feature-pipeline`.
+
 ## Step 0 — Scope the feature before design or code
 
 The gap this skill exists to close. Before reaching for `design-to-code`,
@@ -109,6 +113,12 @@ Before calling the feature done, confirm explicitly:
   one for a given piece.
 - Anything flagged in Step 0 (flag, push/deep-link, analytics) is actually
   wired, not left as a TODO.
+- If `rn-app-driver` is available and the target is an iOS simulator dev
+  build, actually drive the built feature through it (look, act, check)
+  rather than only reading the code back — that's real verification the
+  other bullets here can't provide on their own. If it isn't available
+  (Android target, release build, no simulator running), say so instead
+  of skipping this silently.
 
 Report anything left incomplete explicitly — don't let a partially-done
 feature look finished by omission.

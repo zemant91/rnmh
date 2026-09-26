@@ -21,9 +21,11 @@ these skills write or change files unless noted.
 |---|---|---|---|---|
 | `design-to-code` | `/rnmh:design-to-code` | Given a UI reference (Dribbble/Mobbin link, screenshot, Figma frame) to break down or build from | Grid/palette/typography breakdown, honest critique, anti-slop check, state coverage, move→RN-technology mapping | No (code only if separately asked) |
 | `feature-implementation` | `/rnmh:feature-implementation` | Building a full feature end to end — design through data/state, build, and tests | Orchestrates `design-to-code`/`testing`/instrumentation skills at the right points; adds requirements scoping, data/state integration, and a completion checklist | Yes — the whole feature, via the skills it orchestrates |
+| `feature-pipeline` | `/rnmh:feature-pipeline` | Same as `feature-implementation`, but hands-off after one upfront confirmation instead of a checkpoint at every step | One combined scope/design/data-state proposal, then build → test → on-device verification → real subagent review pass → one consolidated report | Yes — ends at a tested, reviewed PR; never merges, never touches CI/CD deploy or store submission |
 | `refactoring` | `/rnmh:refactoring` | Cleaning up existing code, extracting logic, responding to review feedback | Named-technique refactoring (Fowler catalog) applied in small, confirmed steps | Yes, incrementally, with confirmation at structural steps |
 | `project-bootstrap` | `/rnmh:project-bootstrap` | Starting a brand-new bare RN + TS project, or re-basing folder structure | A batch of setup questions, then a scaffolded project | Yes — creates the project skeleton |
 | `rn-diagnostics` | `/rnmh:rn-diagnostics` | A crash, perf problem, bundler/Metro failure, native build/linking issue, or release-only/platform-only bug | Symptom classification, bucket-specific evidence gathered, confirmed root cause (or a named gap in evidence) | No (hands structural fixes to `refactoring`) |
+| `rn-app-driver` | `/rnmh:rn-app-driver` | Operating the running app on the iOS simulator — reproducing a bug, walking through or verifying a flow | Compact screen view from the React tree, real touches via AXe, each step verified; refuses data-changing taps without explicit approval | No code changes (acts on the running app only) |
 | `release-checklist` | `/rnmh:release-checklist` | Before submitting to the App Store / Play Store, or cutting any production build | Three-way report: confirmed OK / blocker / gap, across versioning, signing, store compliance, rollout safety net | No |
 | `security-review` | `/rnmh:security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
 | `rn-upgrade` | `/rnmh:rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
@@ -100,6 +102,9 @@ at more than one stage, and none of this is a hard gate.
   (not just its UI): scopes it, orchestrates `design-to-code` and
   `testing` in order, and adds the data/state/error-handling and
   completion-checklist pieces neither of those covers on its own.
+- `feature-pipeline` — the same process, for when you want to confirm
+  scope once and get a tested, reviewed PR back rather than being asked
+  at every stage. Never merges or ships on its own.
 - `design-to-code` — every time a new screen/flow is built from a
   reference, whether standalone or as `feature-implementation`'s Step 1.
 - `refactoring` — continuously, as code accumulates and patterns repeat.
@@ -107,6 +112,8 @@ at more than one stage, and none of this is a hard gate.
   testing it isn't wasted effort on something about to change shape.
 - `rn-diagnostics` — whenever a crash/perf/build issue comes up that isn't
   a plain logic bug.
+- `rn-app-driver` — to walk through a screen/flow on the simulator after
+  building or fixing it, instead of describing the check to the user.
 - `push-deep-linking` — once the navigation/auth flows it needs to hook
   into actually exist.
 - `localization` — if multi-locale is a known requirement, wiring it in
@@ -153,8 +160,9 @@ at more than one stage, and none of this is a hard gate.
   forward; triggered by upstream releases, not by project stage.
 
 ### Stage-agnostic — triggered by the situation, not by project age
-`refactoring`, `rn-diagnostics`, `design-to-code` (any time new UI is
-built), and `security-review` (after adding any sensitive-data-adjacent
+`refactoring`, `rn-diagnostics`, `rn-app-driver` (any time a flow needs
+to be reproduced or checked on the running app), `design-to-code` (any
+time new UI is built), and `security-review` (after adding any sensitive-data-adjacent
 capability) apply whenever their trigger condition is met, regardless of
 how old or new the project is.
 
@@ -172,10 +180,13 @@ plugins/
     skills/
       design-to-code/SKILL.md
       feature-implementation/SKILL.md
+      feature-pipeline/SKILL.md
       refactoring/SKILL.md
       refactoring/references/fowler-catalog.md
       project-bootstrap/SKILL.md
       rn-diagnostics/SKILL.md
+      rn-app-driver/SKILL.md
+      rn-app-driver/scripts/       screen.mjs, act.mjs, lib/, policy.default.json
       release-checklist/SKILL.md
       security-review/SKILL.md
       rn-upgrade/SKILL.md
@@ -350,7 +361,25 @@ Done:
     tests. Skill-only, no agent — this is judgment-heavy creative work
     from end to end, not a narrow, mechanically-verifiable task.
 
+19. `rn-app-driver` skill — drives the running app on the iOS simulator:
+    reads the screen from the React component tree over Hermes/CDP (compact,
+    stable semantic ids, visible screen only), acts with real touches via
+    AXe at frames from that tree, waits for the UI to settle, and refuses
+    offscreen or data-changing taps without explicit approval. Ships its
+    own scripts; state lives in the project's `.rnmh/app-driver/`.
+20. `feature-pipeline` skill — the same process as `feature-implementation`
+    collapsed to a single upfront checkpoint (scope + design + data/state
+    proposed together, one go-ahead), then build, test, on-device
+    verification via `rn-app-driver` (where its prerequisites are met),
+    and a real subagent review pass — `refactoring-agent`,
+    `test-coverage-agent`, `architecture-reviewer`, plus whichever
+    instrumentation agent matches scope, invoked as actual subagent calls
+    rather than soft cross-references — ending at a tested, reviewed PR.
+    Never merges to main and never touches CI/CD deployment or store
+    submission; those stay manual by design.
+
 Planned next:
-19. Eventually: publish for other RN developers (the marketplace piece is
+21. `rn-app-driver`: Android (adb input), text input beyond ASCII.
+22. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).

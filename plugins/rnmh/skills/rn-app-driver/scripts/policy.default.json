@@ -1,0 +1,27 @@
+{
+  "_comment": "Presses that may change app data require --confirm. Words match labels incl. icon names (e.g. icon:Trash). Tune per project.",
+  "confirmWords": [
+    "log",
+    "save",
+    "submit",
+    "send",
+    "delete",
+    "remove",
+    "end",
+    "confirm",
+    "pay",
+    "buy",
+    "create",
+    "add",
+    "clear",
+    "reset",
+    "sign out",
+    "log out",
+    "took",
+    "trash",
+    "edit"
+  ],
+  "confirmGroups": [
+    "IntensityPicker"
+  ]
+}

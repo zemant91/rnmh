@@ -1,7 +1,7 @@
 {
   "name": "rnmh",
-  "description": "Personal AI harness for React Native (bare RN + TypeScript) development: design-to-code, refactoring, testing, localization, performance auditing, push notifications/deep linking, CI/CD, feature flags, analytics/crash reporting, architecture review, RN-specific diagnostics, release/security checklists, and safe RN upgrades.",
-  "version": "1.1.0",
+  "description": "Personal AI harness for React Native (bare RN + TypeScript) development: design-to-code, end-to-end feature implementation (interactive or hands-off pipeline to a tested PR), refactoring, testing, localization, performance auditing, push notifications/deep linking, CI/CD, feature flags, analytics/crash reporting, architecture review, RN-specific diagnostics, driving the running app on the simulator, release/security checklists, and safe RN upgrades.",
+  "version": "1.3.0",
   "author": {
     "name": "Valiantsin"
   }
