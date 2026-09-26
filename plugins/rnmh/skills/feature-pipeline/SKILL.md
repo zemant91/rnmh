@@ -118,12 +118,19 @@ difference between this skill and `feature-implementation`'s normal flow.
 ## After the report — applying recommendations
 
 The consolidated report lists every open recommendation, numbered. Do not
-act on any of them yet. If the user then names which ones to apply, treat
-that as one explicit, separate follow-up pass: apply only the named
-items, re-run whatever tests/on-device checks that change touches, and
-update the report to reflect what changed. Never launch this pass
-unprompted, and never expand it to "everything on the list" unless the
-user actually said that.
+act on any of them yet. End the report with an explicit, low-effort reply
+format instead of leaving it open-ended — e.g. "Reply with the numbers to
+apply (like `1,3,6`), `all`, or `none`." This isn't a clickable checklist
+(a plain terminal session has no such widget — only the chat surface
+this harness is sometimes used from does), but a numbered list plus a
+one-line reply format is the cheapest equivalent it can actually offer
+there.
+
+If the user then names which ones to apply, treat that as one explicit,
+separate follow-up pass: apply only the named items, re-run whatever
+tests/on-device checks that change touches, and update the report to
+reflect what changed. Never launch this pass unprompted, and never
+expand it to "everything on the list" unless the user actually said that.
 
 ## Process
 
