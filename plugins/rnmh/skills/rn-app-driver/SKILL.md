@@ -29,9 +29,12 @@ yet), or pixel-level visual review on its own (use screenshots, see below).
 - Run every command **from the app's project root**. The scripts live in
   this skill's `scripts/` folder. Below, `$D` means that folder's absolute
   path (this skill's base directory + `/scripts`).
-- State goes to `.rnmh/app-driver/` in the project (`screen.txt`,
-  `actions.log`). If `.rnmh/` isn't in the project's `.gitignore`, mention
-  it to the user rather than committing those files.
+- State goes to `.rnmh/app-driver/` in the project: `screen.txt` (latest
+  snapshot), `runs/<id>/` (one folder per exploration session — a fresh
+  `screen.mjs` call starts a new one — with `actions.log` for reading and
+  `actions.jsonl` for `save-case.mjs`), and `cases/<name>.json` for saved
+  test cases (see below). If `.rnmh/` isn't in the project's
+  `.gitignore`, mention it to the user rather than committing those files.
 
 If a command fails with "Metro not reachable" or "No debuggable target",
 ask the user to start Metro / open the app. Don't start builds yourself
@@ -97,7 +100,7 @@ node $D/act.mjs press <id> --direct          # call onPress from JS, no touch
   doesn't describe those:
 
 ```bash
-xcrun simctl io booted screenshot .rnmh/app-driver/shot.png
+xcrun simctl io booted screenshot .rnmh/app-driver/runs/$(cat .rnmh/app-driver/runs/.active)/shots/1.png
 ```
 
   Screenshots are slow (~450 ms) and costly in context. Use them for
@@ -140,8 +143,54 @@ When done, report:
   icon-only buttons without an accessibility label;
 - anything you used `--direct` or `--confirm` for.
 
-`.rnmh/app-driver/actions.log` is a timestamped log of every action.
-Point the user to it for longer sessions.
+Each session's actions are logged under
+`.rnmh/app-driver/runs/<id>/actions.log` (human-readable) and
+`actions.jsonl` (structured — what `save-case.mjs` reads). Point the user
+to the run folder for longer sessions, rather than a single ever-growing
+file.
+
+If the flow you just verified is worth checking again later — not a
+one-off bug repro — offer to save it as a regression case:
+`node $D/save-case.mjs <name>`. See "Saving and replaying test cases"
+below.
+
+## Saving and replaying test cases
+
+A run is exploratory by default — actions.jsonl records it, but nothing
+is kept long-term. When a walked flow is worth checking again after
+future changes (not a one-off bug repro), turn it into a saved case:
+
+```bash
+node $D/save-case.mjs <case-name>              # from the run just finished
+node $D/save-case.mjs <case-name> --run <id>   # from an older run (see runs/ folder names)
+```
+
+This writes `.rnmh/app-driver/cases/<case-name>.json` — the ordered
+steps (command, target, any flags) plus the route observed after each
+one, so a later run can tell "got somewhere different" apart from "got
+nowhere."
+
+Replay it with:
+
+```bash
+node $D/run-case.mjs <case-name>
+```
+
+Each step re-runs through `act.mjs` itself (same safety policy, same
+offscreen/duplicate/no-frame checks), so nothing about replay is
+special-cased or less safe than doing it live. It stops at the first
+step that fails or lands on an unexpected route — a case doesn't
+"mostly pass." A case that included a `--confirm`ed step needs
+`run-case.mjs <name> --confirm-all` to replay that step; think about
+whether that's still safe on the app's current data before doing that,
+same as you would live.
+
+Exit code is 0 on a full pass, 1 on any failure — meant to be pluggable
+into `ci-cd-pipeline`'s test gate later, not just read by a person.
+
+Cases are project state (like `.rnmh/app-driver-policy.json`), not part
+of this skill — they live in the project's `.rnmh/`, travel with it, and
+are the user's call whether to commit them.
 
 ## Known limitations
 - iOS simulator + dev builds only. Android isn't wired yet.

@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 // Taps use --tap-style physical: AXe's default FBSimulator tapAt isn't delivered to RN Pressables (Xcode 27 / iOS 27).
 import { connect } from './lib/cdp.mjs';
 import { snapshot, settle } from './lib/snapshot.mjs';
-import { out, loadPolicy } from './lib/paths.mjs';
+import { out, loadPolicy, activeRunDir } from './lib/paths.mjs';
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter(a => a.startsWith('--')));
@@ -97,7 +97,14 @@ try {
 
   const after = await settle(evaluate, { baseline: before.text });
   fs.writeFileSync(out('screen.txt'), after.text);
-  fs.appendFileSync(out('actions.log'), `${new Date().toISOString()} ${cmd} ${before.route}:${sid} "${el.label}" via ${how} -> ${after.route}${CONFIRM ? ' [confirmed]' : ''}\n`);
+  const { dir: runDir } = activeRunDir();
+  const ts = new Date().toISOString();
+  fs.appendFileSync(`${runDir}/actions.log`, `${ts} ${cmd} ${before.route}:${sid} "${el.label}" via ${how} -> ${after.route}${CONFIRM ? ' [confirmed]' : ''}\n`);
+  fs.appendFileSync(`${runDir}/actions.jsonl`, JSON.stringify({
+    ts, cmd, target: sid, label: el.label, arg: cmd === 'type' ? arg3 : (cmd === 'scroll' ? (arg3 ?? 'down') : undefined),
+    flags: { long: LONG || undefined, direct: DIRECT || undefined, confirm: CONFIRM || undefined },
+    beforeRoute: before.route, afterRoute: after.route, changed: after.changed, settledIn: after.settledIn, stable: after.stable, how,
+  }) + '\n');
   const changed = after.changed;
   console.log(`${cmd} ${sid} "${el.label}" via ${how}${inputMs ? ` (${inputMs}ms)` : ''} → settled in ${after.settledIn}ms${after.stable ? '' : ' (still changing)'}${changed ? '' : ' — WARNING: screen did not change'}\n`);
   console.log(after.text);
