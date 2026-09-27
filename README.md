@@ -22,6 +22,7 @@ these skills write or change files unless noted.
 | `design-to-code` | `/rnmh:design-to-code` | Given a UI reference (Dribbble/Mobbin link, screenshot, Figma frame) to break down or build from | Grid/palette/typography breakdown, honest critique, anti-slop check, state coverage, move→RN-technology mapping | No (code only if separately asked) |
 | `feature-implementation` | `/rnmh:feature-implementation` | Building a full feature end to end — design through data/state, build, and tests | Orchestrates `design-to-code`/`testing`/instrumentation skills at the right points; adds requirements scoping, data/state integration, and a completion checklist | Yes — the whole feature, via the skills it orchestrates |
 | `feature-pipeline` | `/rnmh:feature-pipeline` | Same as `feature-implementation`, but hands-off after one upfront confirmation instead of a checkpoint at every step | One combined scope/design/data-state proposal, then build → test → on-device verification → real subagent review pass → one consolidated report | Yes — ends at a tested, reviewed PR; never merges, never touches CI/CD deploy or store submission |
+| `feature-full-auto` | `/rnmh:feature-full-auto` | **EXPERIMENTAL, test-only.** Same as `feature-pipeline` with every stop removed — no checkpoint, `rn-app-driver`'s data-safety confirm bypassed, every recommendation auto-applied | Same as `feature-pipeline`, but with everything the review pass found already applied and a report of every decision made unattended | Yes — same as `feature-pipeline`; never merges/pushes to `main`, never touches CI/CD deploy or store submission |
 | `refactoring` | `/rnmh:refactoring` | Cleaning up existing code, extracting logic, responding to review feedback | Named-technique refactoring (Fowler catalog) applied in small, confirmed steps | Yes, incrementally, with confirmation at structural steps |
 | `project-bootstrap` | `/rnmh:project-bootstrap` | Starting a brand-new bare RN + TS project, or re-basing folder structure | A batch of setup questions, then a scaffolded project | Yes — creates the project skeleton |
 | `rn-diagnostics` | `/rnmh:rn-diagnostics` | A crash, perf problem, bundler/Metro failure, native build/linking issue, or release-only/platform-only bug | Symptom classification, bucket-specific evidence gathered, confirmed root cause (or a named gap in evidence) | No (hands structural fixes to `refactoring`) |
@@ -181,6 +182,7 @@ plugins/
       design-to-code/SKILL.md
       feature-implementation/SKILL.md
       feature-pipeline/SKILL.md
+      feature-full-auto/SKILL.md
       refactoring/SKILL.md
       refactoring/references/fowler-catalog.md
       project-bootstrap/SKILL.md
@@ -384,3 +386,14 @@ Planned next:
 22. Eventually: publish for other RN developers (the marketplace piece is
     already in place; this would mean hosting it somewhere installable by
     others, and generalizing away from this one person's specific choices).
+
+Also done:
+23. `feature-full-auto` skill — EXPERIMENTAL, test-only variant of
+    `feature-pipeline` with every human-in-the-loop stop removed: no
+    upfront checkpoint, `rn-app-driver`'s data-changing confirmation gate
+    bypassed automatically, and every review-agent recommendation
+    implemented rather than reported (judgment calls resolved to the most
+    conservative option, with the choice recorded). Built specifically to
+    dogfood-compare against `feature-pipeline`'s guarded process — never
+    intended as the default, and it keeps the same merge/CI-CD/store
+    boundaries.

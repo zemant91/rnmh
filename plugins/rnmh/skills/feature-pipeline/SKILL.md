@@ -13,6 +13,12 @@ step-by-step control with a confirmation at each stage instead, use
 `feature-implementation` directly — this skill runs the same underlying
 process, collapsed to one confirmation and then run straight through.
 
+For an experimental variant with no checkpoint at all — every review
+recommendation auto-applied, `rn-app-driver`'s data-safety stop bypassed
+— see `feature-full-auto`. That's a deliberately unsafe test skill built
+to see what full automation actually produces, not a safer/faster version
+of this one; use it only when explicitly asked for, never by default.
+
 ## What this skill never does on its own
 
 - Never merges the resulting branch/PR to `main`.

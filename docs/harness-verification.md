@@ -126,6 +126,27 @@ reporting tool rather than real automation:
   hits its mechanical set in practice, or whether the safety protocol is
   so narrow it never finds an applicable case.
 
+## Batch 5 — feature-full-auto vs. feature-pipeline (dogfood comparison)
+
+`feature-full-auto` exists only to answer this comparison, so run it on
+the same kind of real feature `feature-pipeline` was tested on, and check:
+
+- Did it actually implement every review-pass recommendation, not just
+  each agent's own narrow mechanical set — or did it quietly fall back to
+  only the safe subset out of habit?
+- For each judgment-call recommendation it resolved on its own (a product
+  decision, an ambiguous rename, module placement): was the "most
+  conservative option" it picked actually reasonable, and did it name the
+  decision plainly in the report rather than burying it?
+- Did any `rn-app-driver` action it auto-confirmed actually mutate app
+  data in a way that's annoying to clean up? Is that logged clearly
+  enough to find and undo?
+- Compare the two final diffs on the same feature, if both get run:
+  does `feature-full-auto`'s unattended version hold up as well as
+  `feature-pipeline`'s reviewed-then-selectively-applied one, or does the
+  gap between "recommended" and "safe to auto-apply" turn out to matter
+  in practice?
+
 ## Entry format
 
 ```
