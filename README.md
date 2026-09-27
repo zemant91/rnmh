@@ -186,7 +186,8 @@ plugins/
       project-bootstrap/SKILL.md
       rn-diagnostics/SKILL.md
       rn-app-driver/SKILL.md
-      rn-app-driver/scripts/       screen.mjs, act.mjs, lib/, policy.default.json
+      rn-app-driver/scripts/       screen.mjs, act.mjs, save-case.mjs,
+                                   run-case.mjs, lib/, policy.default.json
       release-checklist/SKILL.md
       security-review/SKILL.md
       rn-upgrade/SKILL.md
