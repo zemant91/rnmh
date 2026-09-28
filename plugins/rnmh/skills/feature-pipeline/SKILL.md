@@ -36,6 +36,10 @@ of this one; use it only when explicitly asked for, never by default.
   report; applying any of them is a separate, explicit follow-up the
   user asks for by naming which ones — never a repeat cycle this skill
   decides to run on its own initiative.
+- Persisting open recommendations across runs (see below) never changes
+  this. Surfacing an old open item at the next checkpoint is visibility,
+  not permission — it still needs the user to name it before anything
+  gets applied, same as a fresh recommendation would.
 
 ## The one checkpoint — scope, design, and data/state in a single message
 
@@ -55,6 +59,14 @@ Before touching any code, work out (without asking anything yet):
   since there's no second round to revisit it in.
 - Anything beyond UI in scope: a rollout flag, push/deep-link wiring, new
   analytics events.
+
+Before presenting it, check `.rnmh/feature-pipeline/open-recommendations.json`
+(see "Persisted findings across runs" below) for items still marked
+`open` from earlier runs. If there are any, add a short line to the same
+checkpoint message — how many, one line each — and ask whether to fold
+any into this pass. This is still part of the one checkpoint, not a
+second stop: say it once, alongside the scope/design/data proposal, and
+wait for the same single go-ahead.
 
 Present all of that as one message and wait for one go-ahead. Nothing
 after this point stops for confirmation again — that's the entire
@@ -102,6 +114,10 @@ difference between this skill and `feature-implementation`'s normal flow.
    doesn't change it. Collect everything every agent reported as
    "Recommended, not applied" into one combined list in the final report,
    rather than leaving it scattered across separate outputs.
+8. **Persist.** Write this run's open recommendations to
+   `.rnmh/feature-pipeline/open-recommendations.json` (append, don't
+   overwrite) so they survive past this chat session. See "Persisted
+   findings across runs" below for the file shape.
 
 ## Constraints worth stating at the checkpoint, not after
 
@@ -144,12 +160,64 @@ update the report to reflect what changed. Never launch this pass
 unprompted, and never expand it to "everything on the list" unless the
 user actually said that.
 
+Whatever gets applied this way — from this run's own list or from an
+older item folded in at the checkpoint — set its `status` to `applied`
+in `.rnmh/feature-pipeline/open-recommendations.json`. An item nobody
+named stays `open` in the file; this skill never marks one resolved on
+its own say-so.
+
+## Persisted findings across runs
+
+Each run's report used to end in the chat and nothing else — close the
+session and an unaddressed recommendation was gone unless someone
+happened to remember it. `.rnmh/feature-pipeline/open-recommendations.json`
+keeps them as project state instead:
+
+```json
+{
+  "items": [
+    {
+      "id": "2026-09-27T10-15-00Z-1",
+      "addedAt": "2026-09-27T10:15:00.000Z",
+      "run": "Exercises tab navigation",
+      "severity": "Medium",
+      "text": "Tabs have no flex: 1, so a tap between tabs lands nowhere.",
+      "file": "TabBar.tsx",
+      "status": "open"
+    }
+  ]
+}
+```
+
+- **Read** at the checkpoint (see above) — items still `open` get
+  mentioned there, so they're visible at the one moment this skill is
+  already asking for a decision, instead of needing to be dug up.
+- **Written** at the end of every run — this run's new open
+  recommendations get appended with a fresh `id`, never overwriting what's
+  already there.
+- **Updated** only when something in the file actually gets applied
+  through the explicit follow-up pass above — its `status` flips to
+  `applied`. Nothing else changes an item's status; a recommendation
+  nobody has acted on stays `open` indefinitely, which is the honest
+  state, not a bug to clean up.
+
+This file is visibility, not automation: it makes old findings hard to
+lose, it doesn't make them easier to skip past unaddressed. The "never
+re-runs its own review pass" rule above still holds — persistence changes
+what's easy to see, not what's safe to apply without being asked.
+
+Like `rn-app-driver`'s own `.rnmh/` state, this file is project state, not
+part of this skill's own files — it lives in the project, travels with it,
+and it's the user's call whether to commit it.
+
 ## Process
 
 1. Work out scope, design direction, and data/state/error-handling
-   approach in one pass — no questions yet, just a proposed plan.
-2. Present the single combined checkpoint message and wait for the one
-   go-ahead.
+   approach in one pass — no questions yet, just a proposed plan. Check
+   `.rnmh/feature-pipeline/open-recommendations.json` for `open` items
+   from earlier runs to mention alongside it.
+2. Present the single combined checkpoint message — scope/design/data
+   plus any open items found — and wait for the one go-ahead.
 3. Build (`feature-implementation` Step 4).
 4. Test (`feature-implementation` Step 5).
 5. Run on-device verification via `rn-app-driver` if its prerequisites are
@@ -168,9 +236,12 @@ user actually said that.
 10. Produce one consolidated report: what was built, what
     testing/on-device verification confirmed, what each agent applied,
     whether step 9 pushed/opened a PR or stopped at local commits, and
-    everything still open as a numbered recommendation. Merging and
+    everything still open as a numbered recommendation.
+11. Append this run's open recommendations to
+    `.rnmh/feature-pipeline/open-recommendations.json`. Merging and
     shipping stay manual either way.
-11. If the user then names specific recommendations to apply, treat it as
-    one explicit follow-up pass — apply only those, re-verify what they
-    touch, and update the report. Don't do this unless asked, and don't
-    quietly widen it beyond what was named.
+12. If the user then names specific recommendations to apply (from this
+    run or an older persisted one), treat it as one explicit follow-up
+    pass — apply only those, re-verify what they touch, mark them
+    `applied` in the persisted file, and update the report. Don't do this
+    unless asked, and don't quietly widen it beyond what was named.
