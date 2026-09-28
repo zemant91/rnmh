@@ -400,3 +400,19 @@ Also done:
     dogfood-compare against `feature-pipeline`'s guarded process — never
     intended as the default, and it keeps the same merge/CI-CD/store
     boundaries.
+24. `rn-app-driver` per-case state setup — a saved case can declare
+    `setup: {deepLink?, actions?, fromRun?}`; `run-case` replays that
+    before the first tap and aborts the whole run if it fails, so a case
+    doesn't have to assume where the app already is. `--setup-run <id>`
+    replays another run's actions, `--deep-link <url>` opens a URL via
+    `xcrun simctl openurl` first. Direct storage-level reset was
+    deliberately left out — it would need per-project storage-schema
+    knowledge and break the "only act through the app's own interface"
+    principle.
+25. `feature-pipeline` persisted findings — open recommendations are
+    appended to `.rnmh/feature-pipeline/open-recommendations.json` at the
+    end of every run and read back at the next checkpoint, so old items
+    surface alongside the new scope/design proposal instead of getting
+    lost when the chat session ends. Visibility only: an old item folded
+    into the checkpoint still needs the user to name it before anything
+    gets applied.
