@@ -188,6 +188,35 @@ same as you would live.
 Exit code is 0 on a full pass, 1 on any failure — meant to be pluggable
 into `ci-cd-pipeline`'s test gate later, not just read by a person.
 
+### State setup, when a case needs to start somewhere specific
+
+Most on-device flakiness comes from a case assuming a starting state that
+wasn't actually there — the previous flow left something in a different
+place, or app data drifted. Give a case its own setup instead of just
+hoping the app happens to be in the right state:
+
+```bash
+node $D/save-case.mjs <name> --setup-run <run-id>   # replay another run's actions first
+node $D/save-case.mjs <name> --deep-link "myapp://home"  # open a deep link first
+# both together: --setup-run <id> --deep-link "myapp://..."
+```
+
+`--setup-run` points at an earlier run (walk the app to a known screen,
+tap a debug-menu reset button, whatever gets you there) and replays its
+actions before the case's own steps, unchecked against expected routes —
+getting there is what matters, not the exact path. `--deep-link` opens a
+URL via `xcrun simctl openurl` first, for apps that can jump straight into
+a state without navigating through the UI. A setup failure aborts the
+whole case — nothing after it can be trusted to start from the right
+place.
+
+There's deliberately no direct-storage reset option (clearing AsyncStorage
+or a database file directly). That would need per-project knowledge of
+the storage engine and schema, breaking the "only act through what the
+app's own interface exposes" rule everything else in this skill follows.
+If a project needs a hard reset, expose it as something tappable (a
+debug-menu button, a deep link) and drive that instead.
+
 Cases are project state (like `.rnmh/app-driver-policy.json`), not part
 of this skill — they live in the project's `.rnmh/`, travel with it, and
 are the user's call whether to commit them.
