@@ -72,6 +72,9 @@ work.
   against real projects (auto-trigger disambiguation between overlapping
   skills, content-quality checks, agent hit-rate) before adding anything
   new to it.
+- `docs/backlog.md` (repo root, outside the plugin folder) — ideas worth
+  doing but not designed or scheduled yet; moves to the Roadmap below
+  once actually built.
 - `plugins/rnmh/skills/refactoring/references/fowler-catalog.md` — the
   named-technique catalog (7 chapters + code smells → technique mapping)
   shared by `refactoring` and `refactoring-agent`.
