@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 // Taps use --tap-style physical: AXe's default FBSimulator tapAt isn't delivered to RN Pressables (Xcode 27 / iOS 27).
 import { connect } from './lib/cdp.mjs';
-import { snapshot, settle } from './lib/snapshot.mjs';
+import { snapshot, settle, sleep } from './lib/snapshot.mjs';
 import { out, loadPolicy, activeRunDir } from './lib/paths.mjs';
 
 const args = process.argv.slice(2);
@@ -62,7 +62,7 @@ try {
   if (!DIRECT && offscreen && cmd !== 'scroll') fail(`${sid} is offscreen — scroll its list first (a real tap would hit whatever is there)`);
 
   const cx = Math.round(frame?.[0] + frame?.[2] / 2), cy = Math.round(frame?.[1] + frame?.[3] / 2);
-  let how, inputMs = 0;
+  let how, inputMs = 0, retried = false;
   if (cmd === 'press' && DIRECT) {
     const handler = LONG ? 'onLongPress' : 'onPress';
     const res = await evaluate(`(() => {
@@ -80,9 +80,28 @@ try {
     if (arg3 === undefined) fail('usage: node act.mjs type <id> "value"');
     if (DIRECT) fail('--direct is not supported for type');
     if (/[^\x20-\x7E]/.test(arg3)) fail('AXe types US-keyboard characters only; non-ASCII text is not supported yet');
-    inputMs = axe('touch', '-x', cx, '-y', cy, '--down', '--up', '--delay', '0.05');
-    execFileSync('axe', ['type', '--stdin', '--udid', udid], { input: arg3 });
-    how = `tap ${cx},${cy} + type ${JSON.stringify(arg3)}`;
+    // Tapping a field doesn't make it the first responder synchronously — RN's focus handling and
+    // the keyboard's own show/hide animation both take a beat, especially when switching focus
+    // straight from another field. Typing immediately after the tap is a common way for keystrokes
+    // to land nowhere. Wait briefly before typing, then verify: a controlled TextInput's rendered
+    // value not updating at all is the clearest sign the keystrokes didn't land, and is worth one
+    // retry (re-locating the field first, in case the keyboard appearing moved it) before giving up
+    // and letting the existing "screen did not change" warning below report it.
+    const FOCUS_SETTLE_MS = 250;
+    let tx = cx, ty = cy;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      inputMs = axe('touch', '-x', tx, '-y', ty, '--down', '--up', '--delay', '0.05');
+      await sleep(FOCUS_SETTLE_MS);
+      execFileSync('axe', ['type', '--stdin', '--udid', udid], { input: arg3 });
+      if (attempt === 2) break;
+      const probe = await settle(evaluate, { baseline: before.text, timeout: 800, changeTimeout: 600 });
+      if (probe.changed) break;
+      retried = true;
+      const fresh = await snapshot(evaluate);
+      const freshFrame = fresh.frames[fresh.elements[sid]?.rid];
+      if (freshFrame) { tx = Math.round(freshFrame[0] + freshFrame[2] / 2); ty = Math.round(freshFrame[1] + freshFrame[3] / 2); }
+    }
+    how = `tap ${tx},${ty} + type ${JSON.stringify(arg3)}${retried ? ' (retried)' : ''}`;
   } else {
     const dir = arg3 ?? 'down';
     if (!frame) fail(`${sid} has no frame`);
@@ -102,7 +121,7 @@ try {
   fs.appendFileSync(`${runDir}/actions.log`, `${ts} ${cmd} ${before.route}:${sid} "${el.label}" via ${how} -> ${after.route}${CONFIRM ? ' [confirmed]' : ''}\n`);
   fs.appendFileSync(`${runDir}/actions.jsonl`, JSON.stringify({
     ts, cmd, target: sid, label: el.label, arg: cmd === 'type' ? arg3 : (cmd === 'scroll' ? (arg3 ?? 'down') : undefined),
-    flags: { long: LONG || undefined, direct: DIRECT || undefined, confirm: CONFIRM || undefined },
+    flags: { long: LONG || undefined, direct: DIRECT || undefined, confirm: CONFIRM || undefined, retried: retried || undefined },
     beforeRoute: before.route, afterRoute: after.route, changed: after.changed, settledIn: after.settledIn, stable: after.stable, how,
   }) + '\n');
   const changed = after.changed;

@@ -269,4 +269,27 @@ the same kind of real feature `feature-pipeline` was tested on, and check:
     reproduce and fix, same as the fixes already logged in its own section
     above.
 
-(nothing else verified yet)
+### 2026-09-30 — rn-app-driver (type reliability)
+- Tested on: PocketSpotter, registration screen (email + password fields).
+- Trigger: explicit, `rnmh:rn-app-driver`.
+- Didn't hold up: `act.mjs type` tapped the field and sent keystrokes with
+  no wait in between; two `type` calls in a row (email field, then
+  password field) left the second field empty — the tap almost certainly
+  landed before the field actually became first responder, a race that's
+  worse switching focus between two fields than focusing a fresh one.
+  Reported as: had to fall back to a manual/computer-control input method
+  outside `act.mjs` to type at all, and that path doesn't write to
+  `actions.log`/`actions.jsonl` since it never goes through the script.
+- Fix: `type` now waits 250ms after the tap before sending keystrokes,
+  then checks whether the screen actually changed; if not, it re-locates
+  the field (in case the keyboard appearing moved it) and retries once
+  before giving up. A retry is recorded in the log line and in
+  `actions.jsonl` (`retried: true`), so — unlike the manual-workaround
+  path — it stays visible even when it takes two attempts.
+- Fix still open: verified the retry loop's control flow with a synthetic
+  test (mocked axe/settle calls — no real simulator reachable from where
+  this fix was written); NOT yet verified against a real simulator. Needs
+  a real run on the same registration screen to confirm the delay and the
+  "changed" check actually catch this specific race, and to see whether
+  the invalid-email/short-password validation checks can now be saved as
+  a case per the original ask.

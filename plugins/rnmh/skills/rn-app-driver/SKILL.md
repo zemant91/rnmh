@@ -86,6 +86,8 @@ node $D/act.mjs press <id|"text">            # real tap at element center
 node $D/act.mjs press <id> --long            # long press (0.8 s)
 node $D/act.mjs scroll <scroll-id> down      # up | down | left | right, inside that list
 node $D/act.mjs type <id> "text"             # tap the field, then type (US-keyboard ASCII only)
+                                              # waits briefly for focus, retries once if the field's
+                                              # rendered value doesn't change — see "retried" in the log
 node $D/act.mjs press <id> --direct          # call onPress from JS, no touch
 ```
 
@@ -131,6 +133,7 @@ xcrun simctl io booted screenshot .rnmh/app-driver/runs/$(cat .rnmh/app-driver/r
 | `nothing matches` | Wrong screen or label | Read the current screen printed with the error |
 | `no measured frame` | No native view to measure | Try another element, or `--direct` (report it) |
 | `AXe types US-keyboard characters only` | Non-ASCII input | Tell the user; not supported yet |
+| type retried and the field is still empty | Focus never actually landed (a modal, an overlapping view, a disabled field) | Screenshot to check what's actually focused; don't keep retrying the same command |
 
 If the same action fails twice, stop and report instead of retrying
 variations.

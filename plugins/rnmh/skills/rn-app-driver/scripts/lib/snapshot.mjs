@@ -72,7 +72,7 @@ const walkScreen = () => {
   return JSON.stringify({ route, nodes });
 };
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ---- semantic ids ----
 // Priority: testID → <scope>/<label-slug> → <scope>/<index> for list rows with changing labels.
