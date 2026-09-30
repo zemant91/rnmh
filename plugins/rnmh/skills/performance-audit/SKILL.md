@@ -29,7 +29,10 @@ unnecessary `useMemo`/`useCallback`/`React.memo` add their own
 comparison/memory cost and can obscure a component's logic for no measured
 benefit. State what tool or measurement supports each finding, or name
 that assumption explicitly if the project doesn't have the relevant
-tooling set up yet.
+tooling set up yet. The same discipline applies to naming a "faster"
+alternative library — invoke the `rn-library-research` skill (scoped to
+its Alternatives & performance category) rather than recommending a swap
+on reputation alone.
 
 ## Check what's already there before assuming a setup
 
@@ -57,7 +60,9 @@ what's already decided and why.
   (e.g. a large date/utility library imported wholesale) is worth naming
   as a candidate for a lighter alternative or a scoped import — but
   confirm the replacement covers the actual usage before proposing it,
-  don't assume feature parity.
+  don't assume feature parity. Invoke `rn-library-research` (scoped to
+  Alternatives & performance) to back the suggested replacement with real
+  comparison data.
 
 ### Startup time (time-to-interactive)
 - Confirm Hermes is enabled (bytecode precompilation, faster startup than
@@ -96,7 +101,9 @@ what's already decided and why.
   to try and measure, not a fixed number to apply everywhere.
 - `FlashList` as a drop-in `FlatList` alternative is worth naming as an
   option for a list already confirmed to be a bottleneck — not as an
-  automatic swap.
+  automatic swap. Invoke `rn-library-research` (scoped to Alternatives &
+  performance) before naming it, so the comparison is backed by current
+  benchmark data rather than reputation.
 
 ### Images and memory
 - Images sized or served larger than their rendered dimensions cost decode

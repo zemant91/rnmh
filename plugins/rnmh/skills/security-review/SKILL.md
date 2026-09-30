@@ -102,6 +102,16 @@ device* and *in transit* with sensitive data.
   forgotten analytics or ad SDK collecting more than expected is a common
   gap between "what we said" and "what actually happens."
 
+### Known vulnerabilities in installed dependencies
+- Check load-bearing third-party packages against currently known
+  vulnerabilities by invoking the `rn-library-research` skill, scoped to
+  its Known vulnerabilities category — don't rely on recalling whether a
+  CVE exists for a given package; that recollection is stale the moment
+  it's remembered rather than checked against a current advisory source.
+- A vulnerable version with a patch already released is a different, more
+  urgent finding than one with no fix available yet — report which, and
+  which installed version is actually affected.
+
 ## What NOT to do
 
 - Don't recommend jailbreak/root detection or advanced anti-tampering by

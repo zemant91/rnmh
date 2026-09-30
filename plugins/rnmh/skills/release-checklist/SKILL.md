@@ -56,6 +56,12 @@ this list every time.
 
 ## Store compliance
 
+- Store policy itself changes independently of any RN release cycle —
+  what triggers a privacy manifest, which permission-justification
+  wording is acceptable, category-specific requirements — so check
+  Apple's and Google's currently published policies directly for
+  anything relevant to this release rather than relying on memorized
+  rules, which go stale the moment a policy updates.
 - **iOS privacy manifest** (`PrivacyInfo.xcprivacy`): required if the app
   or any included SDK/native dependency uses an API category Apple tracks
   under "required reason" APIs (e.g. certain filesystem, UserDefaults, or

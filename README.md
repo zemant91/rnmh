@@ -29,6 +29,7 @@ these skills write or change files unless noted.
 | `rn-app-driver` | `/rnmh:rn-app-driver` | Operating the running app on the iOS simulator — reproducing a bug, walking through or verifying a flow | Compact screen view from the React tree, real touches via AXe, each step verified; refuses data-changing taps without explicit approval | No code changes (acts on the running app only) |
 | `release-checklist` | `/rnmh:release-checklist` | Before submitting to the App Store / Play Store, or cutting any production build | Three-way report: confirmed OK / blocker / gap, across versioning, signing, store compliance, rollout safety net | No |
 | `security-review` | `/rnmh:security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
+| `rn-library-research` | `/rnmh:rn-library-research` | Before adding a new third-party package, or invoked by `security-review`/`performance-audit` for their narrower needs | Maintenance/health, New Architecture compatibility, native footprint, bundle size, license, known CVEs, and alternatives — checked against live sources, not memory | No |
 | `rn-upgrade` | `/rnmh:rn-upgrade` | Upgrading the RN version and/or native dependencies | A concrete upgrade sequence, applied one version/dependency at a time, verified on both platforms and build types | Yes — this is the point of the process |
 | `testing` | `/rnmh:testing` | Writing or reviewing tests for a component, hook, or piece of logic, interactively | What's worth testing, RN-specific mocking guidance (native modules, navigation, async state, animations), tests written against observable behavior | Yes — adds/edits test files |
 | `localization` | `/rnmh:localization` | Setting up i18n, adding a locale, extracting hardcoded strings, handling pluralization/formatting/RTL | Detected-setup-aware key extraction, CLDR-aware pluralization guidance, locale-formatting and RTL notes | Yes — adds/edits locale files and translation-call sites |
@@ -166,8 +167,9 @@ at more than one stage, and none of this is a hard gate.
 ### Stage-agnostic — triggered by the situation, not by project age
 `refactoring`, `rn-diagnostics`, `rn-app-driver` (any time a flow needs
 to be reproduced or checked on the running app), `design-to-code` (any
-time new UI is built), and `security-review` (after adding any sensitive-data-adjacent
-capability) apply whenever their trigger condition is met, regardless of
+time new UI is built), `security-review` (after adding any sensitive-data-adjacent
+capability), and `rn-library-research` (any time a new package is about
+to be added) apply whenever their trigger condition is met, regardless of
 how old or new the project is.
 
 
@@ -214,6 +216,7 @@ plugins/
       ci-cd-pipeline/SKILL.md
       feature-flags-remote-config/SKILL.md
       analytics-crash-reporting/SKILL.md
+      rn-library-research/SKILL.md
     agents/
       architecture-reviewer.md
       refactoring-agent.md
