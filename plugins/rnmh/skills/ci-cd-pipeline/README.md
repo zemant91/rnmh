@@ -49,11 +49,20 @@ build instead of relying on someone remembering to run the checklist.
    exact shipped build/version, with a stated retention policy
         │
         ▼
-8. Store delivery — automated (Fastlane pilot/supply) vs. manual,
-   asked not assumed; version/build-number bump strategy decided once
+8. Store delivery — version/build-number bump strategy decided once;
+   Fastlane lanes for TestFlight/Play internal track are WRITTEN AND
+   ACTUALLY RUN, credential locations pointed out step by step, not just
+   templated and handed over
         │
         ▼
-9. Report: what's automated, what's manual by choice, what's a gap
+9. THE GATE — internal-track lanes can run unattended once verified once;
+   public/production release (App Store review, Play production track)
+   NEVER runs without the user's explicit go-ahead in that moment,
+   however automated the rest of the pipeline is
+        │
+        ▼
+10. Report: what's automated (and verified vs. untested), what's manual
+    by choice, what's a gap
 ```
 
 ## Why the checkpoint before any config exists
@@ -63,6 +72,17 @@ that shape later is expensive — so the scope (which stages, which
 triggers, where secrets live) gets confirmed as a plan before any config
 file is created, the same discipline `project-bootstrap` and
 `design-to-code` use before generating anything.
+
+## The public-release gate
+
+Once a Fastlane lane for `ios beta` / `android internal` has been run and
+confirmed to actually land a build in TestFlight/the Play Console
+internal track, it's safe to let it run unattended on every relevant
+build from then on — nothing there reaches a real user. Promoting to
+public review or a production rollout is a different, one-way kind of
+action, so it's never wired into a routine trigger — it always waits for
+the user's explicit go-ahead at that specific moment, no matter how
+automated everything upstream of it is.
 
 ## When to reach for it
 
@@ -108,3 +128,36 @@ file is created, the same discipline `project-bootstrap` and
 **Output:** a working, gated PR pipeline scoped to exactly what was
 asked for — with the deferred pieces named explicitly so nothing looks
 silently decided.
+
+## Worked example — adding Fastlane + basic store deploy
+
+**Input:**
+> "PocketSpotter has an Apple Developer account already but no Google
+> Play Console account yet. Set up Fastlane and get a basic deploy
+> working — point me to where I need to grab credentials."
+
+**What the skill does:**
+
+1. **Detect:** no Fastfile yet; confirms an existing Apple Developer
+   account, no Play Console account/app record.
+2. **iOS credential walkthrough:** points to App Store Connect → Users
+   and Access → Integrations → App Store Connect API to generate a key,
+   names the three values Fastlane needs (Key ID, Issuer ID, the `.p8`
+   file, downloadable once), and wires the Fastfile to read them from a
+   path/env var — never pastes a value into a committed file.
+3. **`ios beta` lane:** writes it, then actually runs it — confirms the
+   build lands in TestFlight, not just that the command exited cleanly.
+4. **Android:** since there's no Play Console account/app record yet,
+   scopes this pass to iOS only, and names exactly what's needed before
+   an Android lane could even be tested — registering a Play Console
+   developer account (one-time fee, Google's own identity verification),
+   creating the app record, then the service-account steps under Setup →
+   API access.
+5. **The gate:** confirms `ios beta` can run unattended on future builds
+   now that it's verified once — and states plainly that submitting to
+   App Store review is a separate, always-manual step regardless.
+
+**Output:** a working, verified `ios beta` lane actually landing builds
+in TestFlight, plus a concrete, ordered list of what's needed on the
+Google side before the Android lane can be written and tested the same
+way — not a half-finished Android lane nobody can run yet.

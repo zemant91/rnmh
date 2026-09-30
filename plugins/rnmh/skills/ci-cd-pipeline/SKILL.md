@@ -1,6 +1,6 @@
 ---
 name: "ci-cd-pipeline"
-description: "Use when setting up or reviewing a CI/CD pipeline for a bare React Native + TypeScript app — lint/type-check/test gating, caching (Node/CocoaPods/Gradle), parallel iOS/Android builds, signing and secrets handling, artifact/source-map retention, and automated store delivery. Automates the concerns `release-checklist` covers manually. For an unattended pass auditing an already-existing pipeline config for gaps, see the `ci-cd-audit-agent` subagent instead."
+description: "Use when setting up or reviewing a CI/CD pipeline for a bare React Native + TypeScript app — lint/type-check/test gating, caching (Node/CocoaPods/Gradle), parallel iOS/Android builds, signing and secrets handling, artifact/source-map retention, and a real, verified Fastlane setup for basic (internal-track) store delivery — public release submission always stays a manual, explicit step. Automates the concerns `release-checklist` covers manually. For an unattended pass auditing an already-existing pipeline config for gaps, see the `ci-cd-audit-agent` subagent instead."
 ---
 
 # CI/CD pipeline (bare React Native + TypeScript)
@@ -96,14 +96,94 @@ never.
   build's artifacts accumulate indefinitely by default.
 
 ### Store delivery
-- Automated upload to TestFlight/Play Console's internal track (Fastlane's
-  `pilot`/`supply`, or the provider's native store-upload action) vs. a
-  manual upload step — ask which is wanted; automating this is usually
-  worth it but does concentrate more trust in the pipeline's secrets.
 - Decide the version/build-number bump strategy once (CI increments it,
   vs. a developer bumps it and CI only reads it) and apply it
   consistently — a mismatch causes a rejected upload (duplicate build
   number).
+- For the actual Fastlane setup and execution — writing the lanes,
+  finding each credential, running and verifying the upload, and the
+  gate around public release — see "Fastlane setup and basic store
+  deploy" below. This isn't a config-writing exercise alone: a lane
+  isn't done until it's actually been run once and the build confirmed
+  to have arrived.
+
+## Fastlane setup and basic store deploy
+
+This is the one part of this skill that goes beyond writing config: once
+a Fastfile/lane is in place, actually run it and confirm the upload
+really happened — a fastlane lane handed over untested is a config file
+with a hope attached to it, not a working pipeline stage.
+
+### Credentials — say exactly where to find each one, never ask for one in chat
+
+- **iOS — App Store Connect API key**: App Store Connect → Users and
+  Access → Integrations → App Store Connect API → generate a key with
+  the App Manager (or Developer) role. Apple shows the private key (a
+  `.p8` file) exactly once at creation — note the Key ID and Issuer ID
+  shown alongside it too, Fastlane needs all three. Reference it from the
+  Fastfile via `app_store_connect_api_key` (a path or env var to the
+  key), never paste the key's contents into a file that gets committed.
+- **iOS signing**: check whether Fastlane match is already in use or
+  wanted (an encrypted cert/profile store in a private git repo or cloud
+  bucket, keyed to a passphrase kept in CI secrets) before assuming it —
+  if certs/profiles are currently managed manually, say so and ask before
+  introducing match as a new moving part.
+- **Android — Google Play service account**: Play Console → Setup → API
+  access → link a Google Cloud project → create a service account there
+  → grant it a release-management role in Play Console → download its
+  JSON key. This requires a Play Console developer account (and an app
+  record) to exist first — a one-time paid registration with its own
+  identity-verification step on Google's side, which is a prerequisite
+  this skill can't shortcut. If the account or app record doesn't exist
+  yet, say so explicitly and scope this pass to the iOS lane only, rather
+  than writing an Android lane that can't be tested.
+- **Android signing**: confirm whether a release keystore already exists
+  before generating one — a keystore that's ever signed a real release
+  build must never be regenerated or lost (Play Console ties every future
+  update to the original signing key), so "does one already exist" is the
+  first question, not "here's a new one."
+- Every credential above is referenced from the Fastfile/Appfile by path,
+  env var, or CI secret name only — never written into a committed file
+  directly, and never typed into chat. If a value needs to reach the
+  pipeline, it goes into the CI provider's own secrets store or a local,
+  gitignored `.env`.
+
+### Lanes to create (internal distribution only — this is the "basic" deploy)
+
+- `ios beta` — build, sign with the App Store distribution profile,
+  upload to TestFlight via `pilot`.
+- `android internal` — build a signed AAB, upload to the Play Console
+  Internal testing track via `supply`.
+- Nothing that promotes a build to public review or production goes into
+  a lane at this stage — see the gate below.
+
+### Run it for real, don't just hand over the file
+
+- After writing a lane, run it and confirm the build actually shows up in
+  TestFlight / the Play Console internal track — check Fastlane's own
+  exit status **and**, where practical, the actual listing. A multi-step
+  lane can exit 0 having failed partway through in some failure modes, so
+  the uploaded build is the real source of truth, not the process exit
+  code alone.
+- If a lane can't be run end-to-end yet (e.g. no Play Console account or
+  app record exists), say so plainly: the lane is written but unverified,
+  not "done."
+
+## The hard gate: public/production release is never automatic
+
+- Once `ios beta` / `android internal` have each been run and confirmed
+  working once, they may run unattended as a normal pipeline stage on
+  every relevant build from then on — internal-track distribution
+  doesn't reach real users and is easy to undo.
+- Anything that reaches real users — an App Store review submission, a
+  Play Console production-track rollout, or promoting an existing
+  internal build to either — always needs the user's explicit, real-time
+  go-ahead at the moment of that specific release, regardless of how
+  automated the rest of the pipeline is. Never wire this into a routine
+  trigger (e.g. "every merge to main auto-submits"), even if asked to,
+  without confirming that's genuinely wanted first — this is a one-way
+  door in a way an internal build isn't. `release-checklist`'s manual
+  walk-through is exactly the check that belongs at this gate.
 
 ## What NOT to do
 - Don't commit signing certificates, keystores, or API keys to the repo,
@@ -115,6 +195,13 @@ never.
   build-time cost compounds on every single run indefinitely.
 - Don't wire up automated store delivery before test/lint gating exists —
   that just makes it faster to ship something broken.
+- Don't write a credential's actual value into the Fastfile/Appfile or
+  any other committed file — reference it by path, env var, or CI secret
+  name only.
+- Don't wire a public/production release (App Store submission, a Play
+  production-track rollout) into an automatic trigger, even if asked to,
+  without confirming that's genuinely wanted first — that crosses from an
+  internal build into something real users see, and it's a one-way door.
 
 ## Process
 
@@ -135,6 +222,13 @@ never.
    slower stages after.
 6. Confirm secrets/signing are handled via the provider's own secrets
    mechanism, never committed to the repo.
-7. Report what's automated, what's left manual by choice (e.g. manual
-   store delivery), and what's a gap worth flagging (missing caching, no
-   artifact/source-map retention, no gating).
+7. If Fastlane lanes for store delivery are in scope, write them, say
+   exactly where each credential comes from, and actually run each lane
+   once — a lane isn't done until the build is confirmed to have reached
+   TestFlight/the Play Console internal track, not when the file merely
+   compiles.
+8. Report what's automated (naming which lanes were run and verified vs.
+   written-but-unverified), what's left manual by choice, what's a gap
+   worth flagging, and restate the public-release gate explicitly:
+   internal-track lanes may run unattended once verified, public
+   submission never does without the user's go-ahead at that moment.
