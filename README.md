@@ -173,6 +173,13 @@ how old or new the project is.
 
 ## Layout
 
+Every skill/agent has a `README.md`/`<name>.README.md` alongside its
+`SKILL.md`/`<name>.md` — plain-language documentation (what it does, how
+its process actually flows, a worked example) for a human to read,
+separate from the instructions Claude itself follows. `SKILL.md` stays
+instruction-only; the README never gets read by Claude as part of
+running the skill.
+
 ```
 .claude-plugin/
   marketplace.json          Marketplace manifest — lets this repo be added
