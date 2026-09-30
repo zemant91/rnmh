@@ -10,6 +10,7 @@
 // CI step (ci-cd-pipeline) would gate on.
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { casePath } from './lib/paths.mjs';
 
 const args = process.argv.slice(2);
@@ -23,7 +24,8 @@ if (!fs.existsSync(file)) fail(`no saved case "${name}" (${file})`);
 const kase = JSON.parse(fs.readFileSync(file, 'utf8'));
 if (kase.needsConfirm && !CONFIRM_ALL) fail(`case "${name}" replays a confirmed (data-changing) step — re-run with --confirm-all after checking that's still safe on this app state`);
 
-const actMjs = new URL('./act.mjs', import.meta.url);
+// A path, not a URL: `node file:///…` isn't a runnable entry point.
+const actMjs = fileURLToPath(new URL('./act.mjs', import.meta.url));
 
 function runStep(step, { assertRoute }) {
   const argv = [actMjs, step.cmd, step.target];
@@ -40,7 +42,8 @@ function runStep(step, { assertRoute }) {
     status = e.status ?? 1;
   }
   if (status !== 0) return { ok: false, reason: stdout.trim() || `exit ${status}` };
-  if (/WARNING: screen did not change/.test(stdout)) return { ok: false, reason: 'screen did not change' };
+  // Setup steps aren't assertion-checked (see header): an already-there tap is fine.
+  if (assertRoute && /WARNING: screen did not change/.test(stdout)) return { ok: false, reason: 'screen did not change' };
   const route = stdout.match(/^screen: (.+)$/m)?.[1];
   if (assertRoute && step.expectRoute && route !== step.expectRoute) {
     return { ok: false, reason: `expected route "${step.expectRoute}", got "${route}"` };
