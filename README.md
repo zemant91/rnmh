@@ -173,12 +173,15 @@ how old or new the project is.
 
 ## Layout
 
-Every skill/agent has a `README.md`/`<name>.README.md` alongside its
-`SKILL.md`/`<name>.md` — plain-language documentation (what it does, how
-its process actually flows, a worked example) for a human to read,
-separate from the instructions Claude itself follows. `SKILL.md` stays
-instruction-only; the README never gets read by Claude as part of
-running the skill.
+Every skill has a `README.md` alongside its `SKILL.md` in its own
+subfolder; every agent has a matching file in `agent-docs/` (agents live
+as flat files directly in `agents/`, and the plugin loader treats every
+`.md` file there as an agent declaration, so a doc file can't sit next to
+it). Either way it's plain-language documentation (what it does, how its
+process actually flows, a worked example) for a human to read, separate
+from the instructions Claude itself follows. `SKILL.md`/`<name>.md` stay
+instruction-only; the docs are never read by Claude as part of running
+the skill/agent.
 
 ```
 .claude-plugin/
@@ -222,6 +225,8 @@ plugins/
       ci-cd-audit-agent.md
       feature-flags-audit-agent.md
       analytics-coverage-agent.md
+    agent-docs/                 One README.md-equivalent per agent above,
+                                 named to match (see note above).
 docs/
   conventions.md             Cross-project decisions log (not part of the
                              plugin itself — read by path, see above).
