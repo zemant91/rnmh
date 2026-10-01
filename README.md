@@ -19,6 +19,7 @@ these skills write or change files unless noted.
 
 | Skill | Invoke as | Use when | Produces | Changes files? |
 |---|---|---|---|---|
+| `rnmh-doctor` | `/rnmh:rnmh-doctor` | Right after installing the plugin, or when a skill fails in a way that might be a missing-tool problem | Grouped machine report: axe/iOS simulator (`rn-app-driver`), fastlane/CocoaPods/Android SDK (`ci-cd-pipeline`), npm/GitHub reachability (`rn-library-research`) — present/missing/skipped with install hints | No |
 | `design-to-code` | `/rnmh:design-to-code` | Given a UI reference (Dribbble/Mobbin link, screenshot, Figma frame) to break down or build from | Grid/palette/typography breakdown, honest critique, anti-slop check, state coverage, move→RN-technology mapping | No (code only if separately asked) |
 | `feature-implementation` | `/rnmh:feature-implementation` | Building a full feature end to end — design through data/state, build, and tests | Orchestrates `design-to-code`/`testing`/instrumentation skills at the right points; adds requirements scoping, data/state integration, and a completion checklist | Yes — the whole feature, via the skills it orchestrates |
 | `feature-pipeline` | `/rnmh:feature-pipeline` | Same as `feature-implementation`, but hands-off after one upfront confirmation instead of a checkpoint at every step | One combined scope/design/data-state proposal, then build → test → on-device verification → real subagent review pass → one consolidated report | Yes — ends at a tested, reviewed PR; never merges, never touches CI/CD deploy or store submission |
@@ -170,7 +171,10 @@ to be reproduced or checked on the running app), `design-to-code` (any
 time new UI is built), `security-review` (after adding any sensitive-data-adjacent
 capability), and `rn-library-research` (any time a new package is about
 to be added) apply whenever their trigger condition is met, regardless of
-how old or new the project is.
+how old or new the project is. `rnmh-doctor` is the one exception worth
+running even before any of these — once right after installing the
+plugin, and again any time a skill fails in a way that might be a
+missing-tool problem rather than a code problem.
 
 
 ## Layout
@@ -217,6 +221,8 @@ plugins/
       feature-flags-remote-config/SKILL.md
       analytics-crash-reporting/SKILL.md
       rn-library-research/SKILL.md
+      rnmh-doctor/SKILL.md
+      rnmh-doctor/scripts/doctor.mjs
     agents/
       architecture-reviewer.md
       refactoring-agent.md
