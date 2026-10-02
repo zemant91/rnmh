@@ -59,6 +59,25 @@ Skip this if a project policy already exists. If the user doesn't want
 to set it up now, say that buttons like "Done" will only be caught by
 the rule below, then carry on.
 
+## Fixtures: start from known, disposable data
+If the app registers test fixtures (the `test-fixtures` skill generates
+them), start a session that will change data from a fixture instead of
+from whatever the app happens to contain:
+
+```bash
+node $D/fixture.mjs list                  # what the app offers
+node $D/fixture.mjs load two-exercises    # reset data to that state, prints the settled screen
+```
+
+Loading resets the app's data through the app's own APIs, with its
+server-state layer offline, so nothing reaches a backend and anything a
+test saves is thrown away by the next load. Say in the report which
+fixture a session started from.
+
+If `fixture.mjs` exits with "no fixtures hook", the app has none. Offer
+to generate them with `test-fixtures`; if the user declines, continue and
+note that data-changing taps act on the app's real local data.
+
 ## The loop
 1. **Look**: `node $D/screen.mjs`
 2. **Act**: one `node $D/act.mjs ...` command. It waits for the UI to
@@ -194,6 +213,7 @@ future changes (not a one-off bug repro), turn it into a saved case:
 
 ```bash
 node $D/save-case.mjs <case-name>              # from the run just finished
+node $D/save-case.mjs <case-name> --fixture <name>   # start every replay from that fixture
 node $D/save-case.mjs <case-name> --run <id>   # from an older run (see runs/ folder names)
 ```
 
@@ -201,6 +221,13 @@ This writes `.rnmh/app-driver/cases/<case-name>.json` — the ordered
 steps (command, target, any flags) plus the route observed after each
 one, so a later run can tell "got somewhere different" apart from "got
 nowhere."
+
+A fixture loaded with `fixture.mjs` before the run's first action is
+recorded automatically; `--fixture` sets or overrides it. `run-case`
+loads it before anything else, and its PASS/FAIL line names it, so a
+failure says which state it started from. Prefer a fixture over
+`--setup-run` whenever the app has one: it's faster and doesn't depend on
+the screens under test.
 
 Replay it with:
 

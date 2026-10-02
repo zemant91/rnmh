@@ -1,6 +1,7 @@
 // Replays a saved case step by step, as a regression check.
 //   node <skill>/scripts/run-case.mjs <case-name> [--confirm-all]
-// If the case has a `setup` (see save-case.mjs), it runs first: an optional deep
+// If the case has a `setup` (see save-case.mjs), it runs first: an optional fixture
+// (the app's data reset to a named, known state via fixture.mjs), an optional deep
 // link, then optional setup actions — neither is assertion-checked (getting to the
 // right state matters, not the exact path) but a failure there still aborts the
 // whole run, since nothing after it can be trusted to start from the right place.
@@ -26,6 +27,8 @@ if (kase.needsConfirm && !CONFIRM_ALL) fail(`case "${name}" replays a confirmed 
 
 // A path, not a URL: `node file:///…` isn't a runnable entry point.
 const actMjs = fileURLToPath(new URL('./act.mjs', import.meta.url));
+const fixtureMjs = fileURLToPath(new URL('./fixture.mjs', import.meta.url));
+const fixtureNote = kase.setup?.fixture ? ` (fixture: ${kase.setup.fixture})` : '';
 
 function runStep(step, { assertRoute }) {
   const argv = [actMjs, step.cmd, step.target];
@@ -49,6 +52,15 @@ function runStep(step, { assertRoute }) {
     return { ok: false, reason: `expected route "${step.expectRoute}", got "${route}"` };
   }
   return { ok: true, route };
+}
+
+if (kase.setup?.fixture) {
+  console.log(`setup: loading fixture ${kase.setup.fixture}`);
+  try {
+    execFileSync('node', [fixtureMjs, 'load', kase.setup.fixture], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (e) {
+    fail(`setup: fixture "${kase.setup.fixture}" didn't load — ${(e.stdout ?? '').trim() || e.message}`, e.status === 2 ? 2 : 1);
+  }
 }
 
 if (kase.setup?.deepLink) {
@@ -91,9 +103,9 @@ for (let i = 0; i < kase.steps.length; i++) {
 }
 
 if (allPass) {
-  console.log(`PASS: "${name}" — ${kase.steps.length} step(s)`);
+  console.log(`PASS: "${name}" — ${kase.steps.length} step(s)${fixtureNote}`);
   process.exit(0);
 } else {
-  console.log(`FAILED: "${name}"`);
+  console.log(`FAILED: "${name}"${fixtureNote}`);
   process.exit(1);
 }

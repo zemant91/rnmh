@@ -52,6 +52,16 @@ a project, `init-policy.mjs` scans the source for form/editor components
 and data-writing code, the user picks which to protect, and anything
 inside those components then needs `--confirm` as well.
 
+## Fixtures
+
+A fixture is a named, known starting state (`empty`, `two-exercises`).
+`fixture.mjs load <name>` resets the app's data to it through the app's
+own APIs, with the server-state layer offline, so nothing reaches a
+backend and whatever a test saved is thrown away by the next load. The
+app provides fixtures through a dev-only hook that the `test-fixtures`
+skill generates after analyzing the project and getting the list
+approved.
+
 ## Saved, replayable cases
 
 A one-off exploration is logged under `.rnmh/app-driver/runs/<id>/` and
@@ -63,7 +73,9 @@ run-case.mjs  <name>               → replays them, stops at the first
                                      mismatch, exits 0 pass / 1 fail
 ```
 
-A case can also declare **setup** — `--setup-run <id>` (replay another
+A case can start from a **fixture** (`--fixture <name>`, or picked up
+automatically when one was loaded at the start of the run), and can also
+declare **setup** — `--setup-run <id>` (replay another
 run's actions first) or `--deep-link <url>` — so it doesn't have to
 assume the app is already in the right starting state.
 

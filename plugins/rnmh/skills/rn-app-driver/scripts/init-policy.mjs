@@ -87,6 +87,7 @@ const words = existing?.confirmWords ?? defaults.confirmWords;
 fs.mkdirSync(path.dirname(projectPolicy), { recursive: true });
 fs.writeFileSync(projectPolicy, JSON.stringify({
   _comment: 'Per-project data-safety policy for rn-app-driver (replaces the plugin default). Created by init-policy.mjs; edit freely.',
+  ...existing, // keep anything else already recorded here (e.g. networkBypass from test-fixtures)
   confirmWords: words,
   confirmGroups: groups,
 }, null, 2) + '\n');

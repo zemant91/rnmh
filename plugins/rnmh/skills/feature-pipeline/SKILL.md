@@ -66,6 +66,12 @@ Before touching any code, work out (without asking anything yet):
   Write the policy with their choice right after the go-ahead. This is the
   only point where it can be asked, since nothing stops for questions
   afterwards.
+- If on-device verification will run and the app has no fixtures hook
+  (`rn-app-driver`'s `fixture.mjs list` reports none): a proposed fixture
+  set from the `test-fixtures` skill's analysis, for approval in this
+  same message. Generate it right after the go-ahead and verify on device
+  from those fixtures. If the user declines, say in the final report that
+  verification ran on the app's real local data.
 
 Before presenting it, check `.rnmh/feature-pipeline/open-recommendations.json`
 (see "Persisted findings across runs" below) for items still marked

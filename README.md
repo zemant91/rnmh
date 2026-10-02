@@ -28,6 +28,7 @@ these skills write or change files unless noted.
 | `project-bootstrap` | `/rnmh:project-bootstrap` | Starting a brand-new bare RN + TS project, or re-basing folder structure | A batch of setup questions, then a scaffolded project | Yes — creates the project skeleton |
 | `rn-diagnostics` | `/rnmh:rn-diagnostics` | A crash, perf problem, bundler/Metro failure, native build/linking issue, or release-only/platform-only bug | Symptom classification, bucket-specific evidence gathered, confirmed root cause (or a named gap in evidence) | No (hands structural fixes to `refactoring`) |
 | `rn-app-driver` | `/rnmh:rn-app-driver` | Operating the running app on the iOS simulator — reproducing a bug, walking through or verifying a flow | Compact screen view from the React tree, real touches via AXe, each step verified; refuses data-changing taps without explicit approval | No code changes (acts on the running app only) |
+| `test-fixtures` | `/rnmh:test-fixtures` | The app needs named, disposable starting states for on-device checks, or its fixtures went stale after a data-shape change | State inventory (stores, local storage, server-state cache, session), a fixture list to approve, then a dev-only fixtures module + verification of each fixture on device | Yes — adds a dev-only module and one `__DEV__`-guarded line in the entry point, after the list is approved |
 | `release-checklist` | `/rnmh:release-checklist` | Before submitting to the App Store / Play Store, or cutting any production build | Three-way report: confirmed OK / blocker / gap, across versioning, signing, store compliance, rollout safety net | No |
 | `security-review` | `/rnmh:security-review` | Reviewing an app handling sensitive data, or after adding a new SDK/WebView/deep link | Category-by-category findings: secret storage, logging, local encryption, transport, WebViews/deep links, screen/session exposure, third-party SDK exposure | No |
 | `rn-library-research` | `/rnmh:rn-library-research` | Before adding a new third-party package, or invoked by `security-review`/`performance-audit` for their narrower needs | Maintenance/health, New Architecture compatibility, native footprint, bundle size, license, known CVEs, and alternatives — checked against live sources, not memory | No |
@@ -207,8 +208,12 @@ plugins/
       project-bootstrap/SKILL.md
       rn-diagnostics/SKILL.md
       rn-app-driver/SKILL.md
-      rn-app-driver/scripts/       screen.mjs, act.mjs, save-case.mjs,
-                                   run-case.mjs, lib/, policy.default.json
+      rn-app-driver/scripts/       screen.mjs, act.mjs, fixture.mjs,
+                                   save-case.mjs, run-case.mjs,
+                                   init-policy.mjs, lib/, policy.default.json
+      test-fixtures/SKILL.md
+      test-fixtures/references/runtime-contract.md
+      test-fixtures/scripts/scan-state.mjs
       release-checklist/SKILL.md
       security-review/SKILL.md
       rn-upgrade/SKILL.md
@@ -437,3 +442,18 @@ Also done:
     lost when the chat session ends. Visibility only: an old item folded
     into the checkpoint still needs the user to name it before anything
     gets applied.
+26. `rn-app-driver` first-session safety policy — `init-policy.mjs` scans
+    the project for form/editor components and data-writing code and
+    proposes them as `confirmGroups`; the user picks which to protect, so
+    generic labels like "Done" inside a form need `--confirm` from the
+    first session. `feature-pipeline` folds the choice into its checkpoint.
+27. `test-fixtures` skill + `rn-app-driver` fixtures — named, disposable
+    starting states. The skill inventories where the app keeps state,
+    proposes fixtures for approval, and generates a dev-only module that
+    writes only through the app's own APIs, seeds the server-state cache
+    and switches its network layer offline (no backend is touched). It
+    registers `globalThis.__rnmhFixtures` (`list`/`load`), which
+    `fixture.mjs` calls over Hermes; `save-case --fixture` records it and
+    `run-case` loads it before the first step. This answers the
+    storage-reset question left open in item 24: state is reset through
+    the app, not underneath it.
