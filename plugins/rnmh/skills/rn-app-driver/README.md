@@ -46,6 +46,12 @@ is the one deliberate exception that bypasses this automatically, and
 logs every such action for the same reason it exists — to see what
 bypassing it produces.)
 
+Labels are only half of it: generic buttons like "Done" or "OK" often
+save data too, but can't go on the word list. So on the first session in
+a project, `init-policy.mjs` scans the source for form/editor components
+and data-writing code, the user picks which to protect, and anything
+inside those components then needs `--confirm` as well.
+
 ## Saved, replayable cases
 
 A one-off exploration is logged under `.rnmh/app-driver/runs/<id>/` and

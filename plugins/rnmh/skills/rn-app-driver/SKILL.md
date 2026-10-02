@@ -40,6 +40,25 @@ If a command fails with "Metro not reachable" or "No debuggable target",
 ask the user to start Metro / open the app. Don't start builds yourself
 unless asked.
 
+## First session in a project: set up the safety policy
+Before the first action in a project that has no
+`.rnmh/app-driver-policy.json` yet, set it up, so data-changing buttons
+are protected from the start instead of after an accidental save:
+
+1. Run `node $D/init-policy.mjs` (dry run, writes nothing). It scans the
+   project's source for form/editor components and components whose file
+   writes data (submit handlers, mutations, storage/API writes) and lists
+   them as candidate groups.
+2. Show the list to the user and ask which to protect. Don't pick for
+   them: the scan is a heuristic and over-includes on purpose.
+3. Write only what they chose: `node $D/init-policy.mjs --write A,B`, or
+   `--write none` if they want none. Re-running later adds groups; it
+   never removes the ones already there.
+
+Skip this if a project policy already exists. If the user doesn't want
+to set it up now, say that buttons like "Done" will only be caught by
+the rule below, then carry on.
+
 ## The loop
 1. **Look**: `node $D/screen.mjs`
 2. **Act**: one `node $D/act.mjs ...` command. It waits for the UI to
@@ -114,11 +133,21 @@ xcrun simctl io booted screenshot .rnmh/app-driver/runs/$(cat .rnmh/app-driver/r
   edit, log, end…). **Stop and ask the user.** Re-run with `--confirm`
   only after they explicitly agree to that specific action. One approval
   covers one action.
-- The policy is a label heuristic and can miss things. If an element
-  obviously creates, edits or deletes data (form submit, rating picker,
-  persisting toggle), ask first even if the command wouldn't refuse.
+- The policy is a label heuristic and can miss things. Generic labels
+  like "Done", "OK", "Apply", "Next" or "Continue" are deliberately not
+  on the word list, because just as many only close a sheet or keyboard.
+  Inside a form, editor or picker, treat them as data-changing and ask
+  first, even if the command wouldn't refuse. The same goes for anything
+  else that obviously creates, edits or deletes data (rating picker,
+  persisting toggle).
 - Per-project policy: `.rnmh/app-driver-policy.json` in the project root
   (same shape as `scripts/policy.default.json`) replaces the default.
+  `confirmGroups` is what catches generic labels: any element inside a
+  listed component needs `--confirm`. Create it with `init-policy.mjs`
+  (see "First session in a project"); edit it by hand any time.
+- If a button turned out to change data without being caught, suggest
+  adding its enclosing group to the project policy, so the gap closes for
+  the next run too.
 - Don't type real credentials or personal data. Use obvious test values.
 - If you created test data anyway, tell the user exactly what, so they
   can remove it.

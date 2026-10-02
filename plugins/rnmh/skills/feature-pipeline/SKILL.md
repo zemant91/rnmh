@@ -59,6 +59,13 @@ Before touching any code, work out (without asking anything yet):
   since there's no second round to revisit it in.
 - Anything beyond UI in scope: a rollout flag, push/deep-link wiring, new
   analytics events.
+- If on-device verification will run and the project has no
+  `.rnmh/app-driver-policy.json` yet: the candidate groups from
+  `rn-app-driver`'s `init-policy.mjs` dry run, so the user picks which
+  form/editor components need confirmation as part of this same message.
+  Write the policy with their choice right after the go-ahead. This is the
+  only point where it can be asked, since nothing stops for questions
+  afterwards.
 
 Before presenting it, check `.rnmh/feature-pipeline/open-recommendations.json`
 (see "Persisted findings across runs" below) for items still marked
